@@ -46,19 +46,19 @@ import file_operations as fop
 
 
 # Constants
-X_MAT_FILEPATH_PREFIX = '../data/Meena_testing/x_mat/'
-COUNTVECTOR_FILEPATH  = '../data/Meena_testing/countvec.obj'
-M1_FILEPATH           = '../data/Meena_testing/M1.obj'
-PCA_FILEPATH          = '../data/Meena_testing/pca.obj'
-PCA_PROJ_WEIGHTS_FILEPATH      = '../data/Meena_testing/pca_proj_weights.obj'
-PCA_WHITENING_WEIGHTS_FILEPATH = '../data/Meena_testing/pca_whitening_weights.obj'
-X_WHITENED_FILEPATH = '../data/Meena_testing/x_whit.obj'
-TLDA_FILEPATH       = '../data/Meena_testing/tlda.obj'
-PREPROCESS_FACTORS_METOO_FILEPATH = '../data/Meena_testing/preprocess_factors_MeToo.obj'
-POST_FACTORS_METOO_FILEPATH       = '../data/Meena_testing/postprocess_factors_MeToo.obj' 
-TOP_WORDS_FILEPATH                = '../data/top_words.csv'
-VOCAB_FILEPATH                    = '../data/vocab.csv'
-TOTAL_DATA_ROWS_FILEPATH          = '../data/total_data_rows.obj'
+X_MAT_FILEPATH_PREFIX = '../data/Meena_testing/x_mat/' # path to store the document-term matrix
+COUNTVECTOR_FILEPATH  = '../data/Meena_testing/countvec.obj' # store the count vectorizer and the tokens
+M1_FILEPATH           = '../data/Meena_testing/M1.obj' # store first moment ie the mean
+PCA_FILEPATH          = '../data/Meena_testing/pca.obj' # store the results from the first PCA on M1
+PCA_PROJ_WEIGHTS_FILEPATH      = '../data/Meena_testing/pca_proj_weights.obj' # Store the projectin weights from PCA
+PCA_WHITENING_WEIGHTS_FILEPATH = '../data/Meena_testing/pca_whitening_weights.obj' # store the whitening weight from PCA
+X_WHITENED_FILEPATH = '../data/Meena_testing/x_whit.obj' # Store the whitened data
+TLDA_FILEPATH       = '../data/Meena_testing/tlda.obj' # store the TLDA object
+PREPROCESS_FACTORS_METOO_FILEPATH = '../data/Meena_testing/preprocess_factors_MeToo.obj' # save pre-processed factors
+POST_FACTORS_METOO_FILEPATH       = '../data/Meena_testing/postprocess_factors_MeToo.obj' # save post-process factors
+TOP_WORDS_FILEPATH                = '../data/top_words.csv' # save the top words per topic
+VOCAB_FILEPATH                    = '../data/vocab.csv' # save the vocab
+TOTAL_DATA_ROWS_FILEPATH          = '../data/total_data_rows.obj'  # save length of data. 
 
 # Device settings
 backend="cupy"
@@ -86,6 +86,7 @@ def tune_filesplit_size_on_IPCA_batch_size(IPCA_batchsize):
     return None
 
 
+# declare the stop words 
 stop_words = (stopwords.words('english'))
 added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","metoo","watch","sexual","doe",
                "said","talk","congrats","congratulations","are","as","i", "time","abus","year","mani","trump",
@@ -107,11 +108,14 @@ added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","
 stop_words= list(np.append(stop_words,added_words))
 CountVectorizer.partial_fit = partial_fit
 
+
+# set you text pre-processing params 
 countvec = CountVectorizer( stop_words = stop_words, # works
                             lowercase = True, # works
-                            ngram_range = (1,2),
-                            max_df = 500000, # works
-                            min_df = 2500)
+                            ngram_range = (1,2), ## allow for bigrams
+                            # toggle these two argumets so that you have 2000 words total in the dictionary
+                             max_df = 500000, # limit this to 10,000
+                             min_df = 2500) ## limit this to 20 
 
 
 inDir  = "../data/MeTooMonthCleaned" # input('Name of input directory? : ')
@@ -119,7 +123,7 @@ inDir  = "../data/MeTooMonthCleaned" # input('Name of input directory? : ')
 # Learning parameters
 num_tops = 100 # 50 topics :(931, 93, 1258) coherence: 2277 (lr=0.00003 )
 alpha_0 = 0.01
-batch_size_pca  = 20000
+batch_size_pca  = 20000  # this will handle 2000 words + 100 topics ad infinite number of documents 
 #batch_size_pca  = 5000 # for whitening
 batch_size_grad = 8000 #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)
 n_iter_train    = 1000
@@ -132,10 +136,10 @@ smoothing   = 1e-7
 split_files = 0
 vocab_build = 0
 save_files  = 0
-pca_run     = 1
+pca_run     = 0
 whiten      = 1
 stgd        = 1
-coherence   = 1
+coherence   = 0
 
 # Other globals
 num_data_rows = 0
@@ -149,7 +153,7 @@ print("\n\nSTART...")
 dl = fop.get_files_in_dir(inDir)
 
 
-# Split datafiles into smaller files
+# Split datafiles into smaller files (makes memory mangement easy)
 print("Splitting files")
 
 if split_files == 1:
@@ -172,6 +176,7 @@ if vocab_build == 1:
         print("Beginning vocabulary build: " + f)
         path_in  = os.path.join(inDir,f)
 
+        #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
         # read in dataframe 
         df = cudf.read_csv(path_in, names = ['tweets'])
 
