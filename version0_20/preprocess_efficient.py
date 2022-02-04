@@ -33,11 +33,11 @@ from nltk.stem import PorterStemmer
 # import cudf
 #from cuml.preprocessing.text.stem import PorterStemmer
 # lemmatization
-#from nltk.stem import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer
 import string
 
 # Initializing lemmatization object
-#lemmatizer = WordNetLemmatizer()
+lemmatizer = WordNetLemmatizer()
 stemmer = PorterStemmer()
 import time
 import string
@@ -47,6 +47,7 @@ p.set_options(p.OPT.EMOJI, p.OPT.SMILEY) #, p.OPT.URL)
 
 # Storing stopwords
 punctuation = list(string.punctuation)
+stop_words = stopwords.words('english')
 
 def check_ascii(line):
     if line is not None:
@@ -98,16 +99,16 @@ def removeStopwords(words):
 def stem(words):
     return " ".join([stemmer.stem(x) for x in words])
 
-# def lemmatize_stem(words):
-#     """ Takes as input a list of words from "removeStopwords and
-#     lemmatizes each word, joins them, and returns them as the final
-#     preprocessed string. """
-#     lemmatizer = WordNetLemmatizer()
-#     lemmatized_words = [lemmatizer.lemmatize(x) for x in words]
-#     #stemmed_words = [stemmer.stem(x) for x in words]
-#     res = " ".join(lemmatized_words)
-#     #print(res)
-#     return res
+def lemmatize_stem(words):
+    """ Takes as input a list of words from "removeStopwords and
+    lemmatizes each word, joins them, and returns them as the final
+    preprocessed string. """
+    # lemmatizer = WordNetLemmatizer()
+    lemmatized_words = [lemmatizer.lemmatize(x) for x in words]
+    #stemmed_words = [stemmer.stem(x) for x in words]
+    res = " ".join(lemmatized_words)
+    #print(res)
+    return res
 
 # def lemmatize(text, nlp=nlp):
 #

@@ -9,13 +9,9 @@ def init_factor(n_topic,seed=None):
     # r = check_random_state(seed)
     std = 1e-5
     order = 3 # always looking for the 3rd order moment
-    #std_factors = (std/tl.sqrt(n_topic))**(1/order)
+    std_factors = (std/tl.sqrt(n_topic))**(1/order)
     # ensure initial values are on proper scale    
-    cp.random.seed(seed)
-
-    init_values = tl.tensor(cp.random.normal(-1, 1, size=(n_topic, n_topic)))
-    init_values, _ = tl.qr(init_values, mode='reduced')
-    #tl.abs(tl.tensor(cp.random.normal(0, std_factors, size=(n_topic, n_topic))))
+    init_values = tl.abs(tl.tensor(cp.random.normal(0, std_factors, size=(n_topic, n_topic))))
     print("Initialization")
     print(init_values)
 

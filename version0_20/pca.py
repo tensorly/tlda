@@ -55,3 +55,4 @@ class PCA():
         X : whitened input tensor
         '''
         return tl.dot(X, (self.projection_weights_ * tl.sqrt(self.whitening_weights_)).T)
+        #return tl.dot(X, (self.projection_weights_ / tl.sqrt(self.whitening_weights_)[None, :]).T)

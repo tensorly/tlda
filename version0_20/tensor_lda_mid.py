@@ -60,21 +60,15 @@ def get_M2(x, M1, alpha_0):
         2014. Online Tensor Methods for Learning Latent Variable Models. In the
         Journal of Machine Learning Research 2014.
     '''
-    #sum_ = batched_tensor_dot(x, x) #(tensor outer product : produce (n_docs, n_words,n_words))
-    #sum_ = tl.mean(sum_, axis=0) #(n_words, n_words)
-    sum_ = tl.zeros((1, x.shape[1]**2))
-    ns = x.shape[0]
-    for i in range(ns):
-        sum_ += tl.tenalg.kronecker([x[i], x[i]])
-    sum_ /= ns
-    sum_ = sum_.reshape((x.shape[1], x.shape[1]))
+    sum_ = batched_tensor_dot(x, x) #(tensor outer product : produce (n_docs, n_words,n_words))
+    sum_ = tl.mean(sum_, axis=0) #(n_words, n_words)
     sum_ = sum_ - tl.diag(tl.mean(x, axis=0))
     sum_ *= (alpha_0 + 1)
     sum_ = sum_ - alpha_0*tl.reshape(kronecker([M1, M1]), sum_.shape) #intended shape is (n_words,n_words) cross means
     return sum_ 
 
 
-def simulate_all(update_whit, alpha_zero, num_tops, lr1 = 0.001, theta=1, seed=None, min_iter = 100,max_iter=1000, verbose = True):
+def simulate_all(update_whit, alpha_zero, num_tops, lr1 = 0.001, min_iter = 100,max_iter=1000, verbose = True):
     '''Adjust M so that it is not negative by projecting it onto a simplex
     Parameters
     ----------
@@ -103,21 +97,18 @@ def simulate_all(update_whit, alpha_zero, num_tops, lr1 = 0.001, theta=1, seed=N
 
     #cumulant1 = Cumulant(num_tops, num_tops)
     weights = tl.ones(num_tops)
-    factors = init_factor(num_tops, seed=seed)
-    tolerance = 1e-5
+    factors = init_factor(num_tops)
     #optimizer1 = torch.optim.SGD(cumulant1.parameters(), lr = lr1)
     i=0
     tol = 1
     while True:
-        factors_old = tl.copy(factors)
         for j, vector in enumerate(update_whit):
-            #if (i >= min_iter) and tol < 1e-6:
-            #    print("converged iteration " + str(i))
-            #    return weights, factors
-            #elif i >= max_iter:
-            #    return weights, factors
-            if i >= max_iter:
+            if (i >= min_iter) and tol < 1e-6:
+                print("converged iteration " + str(i))
                 return weights, factors
+            elif i >= max_iter:
+                return weights, factors
+                
 
             y = vector
             # y_b = tl.dot(vector, W)
@@ -129,17 +120,14 @@ def simulate_all(update_whit, alpha_zero, num_tops, lr1 = 0.001, theta=1, seed=N
             # for param_group in optimizer1.param_groups:
             #     param_group['lr'] = lr1*math.sqrt(10/(10+i))
 
-            step     = lr*cumulant_gradient(factors, y, y_mean, alpha_zero, theta=theta)    
+            step     = lr*cumulant_gradient(factors, y, y_mean, alpha_zero)    
             factors -= step
-            factors /= tl.norm(factors, axis=0)
-            #if (i % 200) == 0:
-            #    if j == 0:
-            #        tol = tl.norm(step)/update_whit.shape[0]
-            #    tol += tl.norm(step)/update_whit.shape[0] 
-        
+            if (i % 200) == 0:
+                if j == 0:
+                    tol = tl.norm(step)/update_whit.shape[0]
+                tol += tl.norm(step)/update_whit.shape[0] 
+
         i += 1  
-        if i >= min_iter and tl.norm(factors-factors_old) < tolerance:
-            return weights, factors
         if verbose == True and (i % 200) == 0:
             print("Epoch: " + str(i) + ", factors: " + str(factors[0][0]))
             print("learning rate: " +str(lr) )
@@ -170,8 +158,13 @@ def get_M3 (x, M1, alpha_0):
         2014. Online Tensor Methods for Learning Latent Variable Models. In the
         Journal of Machine Learning Research 2014.
     '''
+    tl.set_backend('numpy')
+    device = 'cpu'#cuda
+    x = tl.tensor(x.get())
+    M1 = tl.tensor(M1.get())
     ns = x.shape[0] # n_docs
     n  = x.shape[1] # n_words
+
 
     #print(sum_)
     # first cross-moment term

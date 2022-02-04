@@ -10,7 +10,7 @@ import scipy
 import tensorly as tl
 from tensorly.metrics.regression import RMSE
 from tensorly import norm
-from version0_15.tensor_lda_clean import * 
+from tensor_lda_mid import * 
 
 tl.set_backend('numpy')
 device = 'cpu'#cuda

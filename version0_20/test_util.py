@@ -11,8 +11,8 @@ import scipy
 import tensorly as tl
 from tensorly.metrics.regression import RMSE
 from tensorly import norm
-from tlda_final import * 
-
+from version0_20.tlda_final import *
+ 
 tl.set_backend('numpy')
 device = 'cpu'#cuda
 
@@ -22,7 +22,7 @@ def get_mu(top_n, vocab_size, doc_num, t_per_doc,seed):
     http://www.hongliangjie.com/2010/09/30/generate-synthetic-data-for-lda/
     to get document, topic matrices'''
     ## define some constant
-    np.random.seed(seed=1)
+    np.random.seed(seed=seed)
     TOPIC_N = top_n
     VOCABULARY_SIZE = vocab_size
     DOC_NUM = doc_num
@@ -32,7 +32,7 @@ def get_mu(top_n, vocab_size, doc_num, t_per_doc,seed):
     #beta = [0.01 for i in range(VOCABULARY_SIZE)]
     #alpha = [0.9 for i in range(TOPIC_N)]
     beta = [0.1 for i in range(VOCABULARY_SIZE)]
-    alpha = [0.1 for i in range(TOPIC_N)]
+    alpha = [0.01 for i in range(TOPIC_N)]
 
     mu = []
     theta_arr = np.zeros((DOC_NUM, TOPIC_N))
@@ -40,12 +40,14 @@ def get_mu(top_n, vocab_size, doc_num, t_per_doc,seed):
     for i in range(TOPIC_N):
     	topic =	numpy.random.mtrand.dirichlet(beta, size = 1)
     	mu.append(topic)
+    print([np.sum(mu_i) for mu_i in mu])
 
     for i in range(DOC_NUM):
     	buffer = {}
     	z_buffer = {} ## keep track the true z
     	## first sample theta
     	theta = numpy.random.mtrand.dirichlet(alpha,size = 1)
+    	# theta /= np.sum(theta)
     	for j in range(TERM_PER_DOC):
     		## first sample z
     		z = numpy.random.multinomial(1,theta[0],size = 1)
