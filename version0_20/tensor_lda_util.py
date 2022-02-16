@@ -1,17 +1,22 @@
 import numpy as np
 
-from scipy.special import comb, digamma, gammaln
-from scipy.stats import gamma
+
+if(tl.get_backend() == "cuda"):
+	from cupyx.scipy.special import comb, digamma, gammaln
+	from cupyx.stats import gamma
+else:
+	from scipy.special import comb, digamma, gammaln
+	from scipy.stats import gamma
 # import sparse
-import scipy
+
 
 # Import TensorLy
 import tensorly as tl
 from tensorly import norm
 from tensorly.tenalg.core_tenalg.tensor_product import batched_tensor_dot
 
-tl.set_backend('numpy')
-device = 'cpu'#cuda
+
+
 
 def get_ei(length, i):
     '''Get the ith standard basis vector of a given length'''

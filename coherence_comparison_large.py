@@ -422,9 +422,9 @@ def main():
     alpha_0 = 0.01
     tl.set_backend("numpy") 
     print("starting")
-    texts, vocab, texts_lemmatized = get_uci_data()
+    #texts, vocab, texts_lemmatized = get_uci_data()
     #texts, vocab = get_congress_data()
-    #texts, _ = get_metoo_data()
+    texts, _ = get_metoo_data()
     
     #df = pd.read_csv("data/MeTooMonthCleaned/twitter_per_month_201701.csv", header=0, names=["tweets"], dtype = str)
     #print(df.head())
@@ -436,8 +436,8 @@ def main():
     #texts = pickle.load( open('data/countvecs_congress_tweets.obj', 'rb'))
     #vectorizer = pickle.load(open("data/Meena_testing/countvec.obj", "rb"))
     #vocab = cp.asnumpy(vectorizer.get_feature_names())
-    #df = pd.read_csv("data/vocab.csv")
-    #vocab = df['words'].tolist()
+    df = pd.read_csv("data/vocab.csv")
+    vocab = df['words'].tolist()
     #texts_raw = pickle.load(open("data/preprocessed_metoo_tweets.obj", "rb"))
     #texts_lemmatized = []
     ##texts_raw = texts
@@ -445,7 +445,7 @@ def main():
     #    texts_lemmatized.append([w for w in text.split(' ') if w.lower() in vocab])
     #pickle.dump(texts_lemmatized, open("data/countvecs_metoo_lemmatized.obj", 'wb'))
     #return
-    #texts_lemmatized = pickle.load(open("data/countvecs_metoo_lemmatized.obj", 'rb'))
+    texts_lemmatized = pickle.load(open("data/countvecs_metoo_lemmatized.obj", 'rb'))
     #print("got data")
     #print(texts.shape)
     
@@ -462,18 +462,18 @@ def main():
     
     id2word = corpora.Dictionary(texts_lemmatized)
     corpus = [id2word.doc2bow(text) for text in texts_lemmatized]
-    t1 = time.time()
-    lda_model = models.ldamulticore.LdaMulticore(corpus=corpus,
-                                       id2word=id2word,
-                                       num_topics=n_tops,
-                                       #chunksize=100,
-                                       passes=10,
-                                       #alpha_0,
-                                       per_word_topics=False)
-    factors_gensim = lda_model.get_topics()
-    t2 = time.time()
-    res3 = ('gensim LDA', t2 - t1)
-    print(res3)
+    #t1 = time.time()
+    #lda_model = models.ldamulticore.LdaMulticore(corpus=corpus,
+    #                                   id2word=id2word,
+    #                                   num_topics=n_tops,
+    #                                   #chunksize=100,
+    #                                   passes=10,
+    #                                   #alpha_0,
+    #                                   per_word_topics=False)
+    #factors_gensim = lda_model.get_topics()
+    #t2 = time.time()
+    #res3 = ('gensim LDA', t2 - t1)
+    #print(res3)
     #print(res3)
     #pickle.dump(factors_gensim, open("data/gensim_metoo_factors.obj", "wb"))
     #factors_gensim = pickle.load(open("data/gensim_metoo_factors.obj", "wb"))
@@ -489,9 +489,9 @@ def main():
     #factors_tlda = factors_tlda.T
     #print(factors_tlda.shape)
     #print(res)
-    #factors_tlda = pickle.load(open("data/Meena_testing/tlda_factors_metoo.obj", "rb"))
+    factors_tlda = pickle.load(open("data/Meena_testing/tlda_factors_metoo.obj", "rb"))
     #factors_tlda = factors_tlda.T
-   # factors_tlda = cp.asnumpy(factors_tlda).T
+    factors_tlda = cp.asnumpy(factors_tlda).T
     #return
     #print(factors_tlda.device)
     #print(tl.get_backend())
@@ -505,7 +505,7 @@ def main():
     #factors_parafac = factors_parafac.T
     #factors_uncentered = factors_uncentered.T
     
-    #tl.set_backend('numpy')
+    tl.set_backend('numpy')
     K = 20
     vocab = np.asarray(vocab)
     #texts = cp.asnumpy(texts)
@@ -539,9 +539,9 @@ def main():
     for topic in range(n_tops):
         #top_sklearn = np.argpartition(factors_sklearn[topic],-K)[-K:]
         #top_gensim = np.argpartition(factors_gensim[topic],-K)[-K:]
-        #top_tlda = np.argpartition(factors_tlda[topic],-K)[-K:]
+        top_tlda = np.argpartition(factors_tlda[topic],-K)[-K:]
         #top_sklearn = np.argsort(factors_sklearn[topic])[::-1][:K]
-        top_gensim = np.argsort(factors_gensim[topic])[::-1][:K]
+        #top_gensim = np.argsort(factors_gensim[topic])[::-1][:K]
         #top_tlda = np.argsort(factors_tlda[topic])[::-1][:K]
         #print(top_tlda)
         
@@ -550,8 +550,8 @@ def main():
         #print(top_sklearn)
         
         #topics_sklearn.append((vocab)[top_sklearn.astype(int)])
-        topics_gensim.append((vocab)[top_gensim.astype(int)])
-        #topics_tlda.append((vocab)[top_tlda.astype(int)])
+        #topics_gensim.append((vocab)[top_gensim.astype(int)])
+        topics_tlda.append((vocab)[top_tlda.astype(int)])
         #topics_parafac.append((vocab)[top_parafac.astype(int)])
         #topics_uncentered.append((vocab)[top_uncentered.astype(int)])
 
@@ -581,11 +581,11 @@ def main():
     #sklearn_coh = models.coherencemodel.CoherenceModel(topics=topics_sklearn, texts=texts_lemmatized, dictionary = id2word, coherence='u_mass')
     #print(sklearn_coh.get_coherence())
     #print(topics_gensim)
-    gensim_coh = models.coherencemodel.CoherenceModel(topics=topics_gensim, texts=(texts_lemmatized), dictionary = id2word, coherence='u_mass')
-    print(gensim_coh.get_coherence())
-    #tlda_coh = models.coherencemodel.CoherenceModel(topics=topics_tlda, texts=(texts_lemmatized), dictionary = id2word, coherence='u_mass')
+    #gensim_coh = models.coherencemodel.CoherenceModel(topics=topics_gensim, texts=(texts_lemmatized), dictionary = id2word, coherence='u_mass')
+    #print(gensim_coh.get_coherence())
+    tlda_coh = models.coherencemodel.CoherenceModel(topics=topics_tlda, texts=(texts_lemmatized), dictionary = id2word, coherence='u_mass')
     #print(topics_tlda)
-    #print(tlda_coh.get_coherence())
+    print(tlda_coh.get_coherence())
     #parafac_coh = models.coherencemodel.CoherenceModel(topics=topics_parafac, texts=(texts_lemmatized), dictionary = id2word, coherence='u_mass')
     #print(parafac_coh.get_coherence())
     #uncentered_coh = models.coherencemodel.CoherenceModel(topics=topics_uncentered, texts=(texts_lemmatized), dictionary = id2word, coherence='u_mass')

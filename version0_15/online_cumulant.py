@@ -3,6 +3,7 @@ import tensorly.tenalg as tnl
 from tensorly.tenalg.core_tenalg import tensor_dot, batched_tensor_dot, outer, inner
 from tensorly import check_random_state
 import cupy as cp
+import numpy as np
 
 def init_factor(n_topic,seed=None):
     # None seed uses numpy global seed
@@ -11,9 +12,16 @@ def init_factor(n_topic,seed=None):
     order = 3 # always looking for the 3rd order moment
     #std_factors = (std/tl.sqrt(n_topic))**(1/order)
     # ensure initial values are on proper scale    
-    cp.random.seed(seed)
+    if (seed is not None):
+        if tl.get_backend() == "cupy":
+            cp.random.seed(seed)
+        else:
+            np.random.seed(seed)
 
-    init_values = tl.tensor(cp.random.normal(-1, 1, size=(n_topic, n_topic)))
+    if (tl.get_backend() == "cupy"):
+        init_values = tl.tensor(cp.random.normal(-1, 1, size=(n_topic, n_topic)))
+    else:
+        init_values = tl.tensor(np.random.normal(-1, 1, size=(n_topic, n_topic)))
     init_values, _ = tl.qr(init_values, mode='reduced')
     #tl.abs(tl.tensor(cp.random.normal(0, std_factors, size=(n_topic, n_topic))))
     print("Initialization")

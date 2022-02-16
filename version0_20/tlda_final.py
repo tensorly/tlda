@@ -25,8 +25,10 @@ class TLDA():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1, seed=None): # we could try to find a more informative name for alpha_0
         # set all parameters here
         # r = check_random_state(1)
-        cp.random.seed(seed)
-
+        if(tl.get_backend() == "cupy"):
+            cp.random.seed(seed)
+        else:
+            np.random.seed(seed)
         self.n_topic = n_topic
         self.alpha_0 = alpha_0
         self.n_iter_train = n_iter_train
@@ -52,11 +54,11 @@ class TLDA():
         # deviation = tl.tensor(cp.random.lognormal(mean, std, size = (n_topic, n_topic)))
         # init_values = tl.abs(tl.eye(n_topic) - deviation)
         # init_values = deviation
-        ortho_loss = 2
+        ortho_loss = 100
         i = 1
-        min_ortho_loss = 2
-        while ortho_loss >= 1 and i <= 20:
-            if(tl.get_backend() == "cuda"):
+        min_ortho_loss = 100
+        while ortho_loss >= 1.5 and i <= 20:
+            if(tl.get_backend() == "cupy"):
                 init_values = tl.tensor(cp.random.uniform(-1, 1, size=(n_topic, n_topic)))
             else:
                 init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
@@ -65,7 +67,10 @@ class TLDA():
             if i == 1 or ortho_loss < min_ortho_loss:
                 self.factors_ = init_values
                 min_ortho_loss = ortho_loss
+            #theta -= 0.1
             i += 1
+        #self.theta = theta
+        #print(self.theta)
         #print("iterations for initialization: " + str(i))
         #print("min ortho loss: " + str(min_ortho_loss))
         # init_values /= tl.norm(init_values, axis=0)
@@ -128,7 +133,7 @@ class TLDA():
         ortho_loss = 0
         # outFile = open("results/test_grads.txt", 'w')
         # while (i <= 100 or max_diff >= tol) and i < max_train_iter:
-        # while (i <= 5000):
+        #while (i <= 5000):
         # while (i <= 100 or max_diff <= max_diff_prev or max_diff >= tol) and i < max_train_iter:
         while (i <= 10 or max_diff >= tol) and i < max_train_iter:
         # while (i <= 10 or ortho_loss >= tol) and i < max_train_iter:

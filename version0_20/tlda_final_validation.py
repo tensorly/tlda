@@ -30,7 +30,7 @@ def loss_rec(factor, cumulant, theta):
 
 
 class TLDA():
-    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1, seed=None): # we could try to find a more informative name for alpha_0
+    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1, ortho_loss_criterion = 1000, seed=None): # we could try to find a more informative name for alpha_0
         
         if(tl.get_backend() == "cuda"):
             cp.random.seed(seed)
@@ -52,11 +52,11 @@ class TLDA():
         # Initial values 
         log_norm_std = 1e-5
         log_norm_mean = alpha_0
-        ortho_loss = 10001 # initializing the ortho loss
+        ortho_loss = ortho_loss_criterion+1 # initializing the ortho loss
         i = 1
         # Finding optimal starting values based on orthonormal inits:
-        while ortho_loss >= 1000:
-            if(tl.get_backend() == "cuda"):
+        while ortho_loss >= ortho_loss_criterion:
+            if(tl.get_backend() == "cupy"):
                 init_values = tl.tensor(cp.random.uniform(-1, 1, size=(n_topic, n_topic)))
             else:
                 init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
@@ -69,6 +69,7 @@ class TLDA():
                 #print(ortho_loss)
         #print(ortho_loss)    
         self.factors_ = init_values
+    
     def postprocess(self,pca,M1,vocab):
         '''Post-Processing '''
         # Postprocessing
@@ -196,9 +197,9 @@ class TLDA():
                  adjusted factor
         '''
 
-        adjusted_factor = tl.transpose(self.factors_)
-        adjusted_factor = tl_util.non_negative_adjustment(adjusted_factor)
-        adjusted_factor = tl_util.smooth_beta(adjusted_factor, smoothing=self.smoothing)
+        #adjusted_factor = tl.transpose(self.factors_)
+        #adjusted_factor = tl_util.non_negative_adjustment(adjusted_factor)
+        #adjusted_factor = tl_util.smooth_beta(adjusted_factor, smoothing=self.smoothing)
 
         gammad_l = (np.array([tl.to_numpy(self._predict_topic(doc, adjusted_factor)) for doc in X_test]))
         gammad_l = tl.tensor(np.nan_to_num(gammad_l))
