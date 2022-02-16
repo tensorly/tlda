@@ -1,35 +1,32 @@
-import numpy as np
-import cupy as cp
 import tensorly as tl
-if(tl.get_backend() == "cuda"):
-	from cupyx.scipy.special import digamma, gammaln
-else:
-	from scipy.special import  digamma, gammaln
-
-# import sparse
-
-
-# Import TensorLy
-import tensorly as tl
-from tensorly import norm
-from tensorly.tenalg.core_tenalg.tensor_product import batched_tensor_dot
-
-
 
 
 def dirichlet_expectation(alpha):
     '''Normalize alpha using the dirichlet distribution'''
-    return digamma(alpha) - digamma(sum(alpha))
+    return tl.digamma(alpha) - tl.digamma(sum(alpha))
 
 
 
 
+def loss_rec(factor, cumulant, theta):
+    '''Inputs:
+        factor: (n_topics x n_topics): whitened factors from the SGD 
+        cumulant: Whitened M3 (n_topics x n_topicsx n_topics)
+        theta:  othogonalization penalty term (scalar)            
+        output: 
+        total loss evaluation: 
+        orthogonality loss:
+        reconstruction loss:   
+    '''   
 
-def log_sum_exp(x):
-    '''calculate log(sum(exp(x)))'''
-    a = tl.max(x)
-    
-    if(tl.get_backend() == "cuda"):
-        return a + cp.log(cp.sum(cp.exp(x - a)))
-    else:
-        return a + np.log(np.sum(np.exp(x - a)))
+    rec = tl.cp_to_tensor((None, [factor]*3))
+    rec_loss = 0
+    if cumulant is not None:
+        rec_loss = -1* tl.tenalg.inner(rec, cumulant)
+    ortho_loss = (1 + theta)/2*tl.norm(rec, 2)**2 
+    if cumulant is not None:
+        return ortho_loss + rec_loss, ortho_loss, rec_loss/tl.norm(cumulant, 2)
+    return ortho_loss + rec_loss, ortho_loss, rec_loss
+
+
+

@@ -66,7 +66,7 @@ class TLDA():
             else:
                 init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
             init_values, _ = tl.qr(init_values, mode='reduced')
-            _, ortho_loss, _ = loss_rec(init_values, cumulant, self.theta)
+            _, ortho_loss, _ = tl_util.loss_rec(init_values, cumulant, self.theta)
             i += 1
             self.theta -= 0.1		
    
@@ -118,11 +118,6 @@ class TLDA():
         print("Fitting") 
         while (i <= 10 or max_diff >= tol) and i < self.n_iter_train:
             prev_fac = tl.copy(self.factors_)
-#            for f in fop.get_files_in_dir(self.dl):
-               # print(f)
-#                y = pickle.load(open(self.dl+f, 'rb'))
-#                file_count += 1
-#                if file_count % 100 ==0:
             for j in range(0, len(X), self.batch_size):
                 y  = X[j:j+self.batch_size]
                 lr = self.learning_rate
@@ -146,7 +141,7 @@ class TLDA():
             self.factors_ = self.postprocess(pca,M1,vocab)
 
 
-    def _predict_topic(self, doc, adjusted_factor):
+    def _predict_topic(self, X_batch):
         '''Infer the document-topic distribution vector for a given document
 
         Parameters
@@ -162,44 +157,26 @@ class TLDA():
         gammad : tensor of shape (1, n_cols) equal to the document/topic distribution
                  for the doc vector
         '''
-        n_cols = len(self.weights_)
-        if(tl.get_backend() == "cuda"):
-            gammad = tl.tensor(gamma.rvs(self.gamma_shape, scale= 1.0/self.gamma_shape, size = n_cols))
-            exp_elogthetad = tl.tensor(cp.exp(tl_util.dirichlet_expectation(gammad)))
-            exp_elogbetad = tl.tensor(cp.array(adjusted_factor))
 
-            phinorm = (tl.dot(exp_elogbetad, exp_elogthetad) + 1e-100)
-            mean_gamma_change = 1.0
+        # factors = nvocab x ntopics
+        n_topics = len(self.weights_)
+        n_docs = X_batch.shape[0]
 
-            iter = 0
-            while (mean_gamma_change > 1e-3 and iter < self.n_iter_test):
-                lastgamma      = tl.copy(gammad)
-                gammad         = ((exp_elogthetad * (tl.dot(exp_elogbetad.T, doc / phinorm))) + self.weights_)
-                exp_elogthetad = tl.tensor(np.exp(tl_util.dirichlet_expectation(gammad)))
-                phinorm        = (tl.dot(exp_elogbetad, exp_elogthetad) + 1e-100)
+        gammad = tl.tensor(gamma.rvs(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
+        exp_elogthetad = tl.tensor(cp.exp(tl_util.dirichlet_expectation(gammad))) #ndocs, n_topics
+        phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-100) #ndoc X nvocab
+        max_gamma_change = 1.0
 
-                mean_gamma_change = tl.sum(tl.abs(gammad - lastgamma)) / n_cols
-                all_gamma_change  = gammad-lastgamma
-                iter += 1
+        iter = 0
+        while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
+            lastgamma      = tl.copy(gammad)
+            gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.factors_.T))) + self.weights_) # estimate for the variational mixing param
+            exp_elogthetad = tl.exp(tl_util.dirichlet_expectation(gammad))
+            phinorm        = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20)
 
-        else:
-            gammad = tl.tensor(gamma.rvs(self.gamma_shape, scale= 1.0/self.gamma_shape, size = n_cols))
-            exp_elogthetad = tl.tensor(np.exp(tl_util.dirichlet_expectation(gammad)))
-            exp_elogbetad = tl.tensor(np.array(adjusted_factor))
-
-            phinorm = (tl.dot(exp_elogbetad, exp_elogthetad) + 1e-100)
-            mean_gamma_change = 1.0
-
-            iter = 0
-            while (mean_gamma_change > 1e-3 and iter < self.n_iter_test):
-                lastgamma      = tl.copy(gammad)
-                gammad         = ((exp_elogthetad * (tl.dot(exp_elogbetad.T, doc / phinorm))) + self.weights_)
-                exp_elogthetad = tl.tensor(np.exp(tl_util.dirichlet_expectation(gammad)))
-                phinorm        = (tl.dot(exp_elogbetad, exp_elogthetad) + 1e-100)
-
-                mean_gamma_change = tl.sum(tl.abs(gammad - lastgamma)) / n_cols
-                all_gamma_change  = gammad-lastgamma
-                iter += 1
+            mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
+            max_gamma_change       = tl.max(mean_gamma_change_pdoc)
+            iter += 1
 
         return gammad
 
@@ -221,19 +198,8 @@ class TLDA():
                  adjusted factor
         '''
 
-        if(tl.get_backend() == "cuda"):
-            gammad_l =  cp.array([tl.to_cupy(self._predict_topic(doc, self.factors_)) for doc in X_test])
-            gammad_l = tl.tensor(cp.nan_to_num(gammad_l))
+        gammad_l = self._predict_topic(X_test)
+        gammad_norm  = tl.exp([tl_util.dirichlet_expectation(g) for g in gammad_l])
+        gammad_norm2 = gammad_norm/tl.reshape(tl.sum(gammad_norm,axis=1),(-1,1))
 
-            #normalize using exponential of dirichlet expectation
-            gammad_norm = tl.tensor(cp.exp(cp.array([tl_util.dirichlet_expectation(g) for g in gammad_l])))
-            gammad_norm2 = tl.tensor(cp.array([row / cp.sum(row) for row in gammad_norm]))
-        else:
-            gammad_l = (np.array([tl.to_numpy(self._predict_topic(doc, self.factors_)) for doc in X_test]))
-            gammad_l = tl.tensor(cp.nan_to_num(gammad_l))
-
-            #normalize using exponential of dirichlet expectation
-            gammad_norm = tl.tensor(np.exp(np.array([tl_util.dirichlet_expectation(g) for g in gammad_l])))
-            gammad_norm2 = tl.tensor(np.array([row / np.sum(row) for row in gammad_norm]))
-
-        return gammad_norm2, tl.transpose(self.factors_)
+        return gammad_norm2
