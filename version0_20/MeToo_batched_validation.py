@@ -88,13 +88,13 @@ def tune_filesplit_size_on_IPCA_batch_size(IPCA_batchsize):
 
 # declare the stop words 
 stop_words = (stopwords.words('english'))
-added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","metoo","watch","sexual","doe",
-               "said","talk","congrats","congratulations","are","as","i", "time","abus","year","mani","trump",
-               "me", "my", "myself", "we", "our", "ours", "ourselves", "use","look","movement","assault",
-               "you", "your", "yours","he","her","him","she","hers","that","harass","whi","feel","say","gt",
-               "be","with","their","they're","is","was","been","not","they","womensmarch","way","thi",
+added_words = ["sexual","metoo","womensmarch","thread","say","will","has","by","for","hi","hey","hah","thank","watch","doe",
+               "said","talk","congrats","congratulations","are","as","i", "time","year","mani","trump",
+               "me", "my", "myself", "we", "our", "ours", "ourselves", "use","look","movement",
+               "you", "your", "yours","he","her","him","she","hers","that","whi","feel","say","gt",
+               "be","with","their","they're","is","was","been","not","they","way","thi",
                "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell",
-               "good","day","work", "latest","today","becaus","peopl","via","see","timesup","old","ani",
+               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani",
                "call", "wouldnt","wow", "learned","hi"   , "things" ,"thing","can't","can","right","got","show",
                "cant","will","go","going","let","would","could","him","his","think","thi","ha","onli","back",
                "lets","let's","say","says","know","talk","talked","talks","dont","think","watch","right",
@@ -112,7 +112,7 @@ CountVectorizer.partial_fit = partial_fit
 # set you text pre-processing params 
 countvec = CountVectorizer( stop_words = stop_words, # works
                             lowercase = True, # works
-                            ngram_range = (1,2), ## allow for bigrams
+                            ngram_range = (1,2), ## allow for bigrams (might want to try tri-gram)
                             # toggle these two argumets so that you have 2000 words total in the dictionary
                              max_df = 500000, # limit this to 10,000
                              min_df = 2500) ## limit this to 20 
@@ -120,6 +120,8 @@ countvec = CountVectorizer( stop_words = stop_words, # works
 
 inDir  = "../data/MeTooMonthCleaned" # input('Name of input directory? : ')
 
+
+n_topic = list(5,10,20,30,40,50,60,70,80,90,100,200)
 # Learning parameters
 num_tops = 100 # 50 topics :(931, 93, 1258) coherence: 2277 (lr=0.00003 )
 alpha_0 = 0.01
