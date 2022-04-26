@@ -51,6 +51,7 @@ class TLDA():
             self.theta -= 0.1		
    
         self.factors_ = init_values
+    
     def postprocess(self,pca,M1,vocab):
         '''Post-Processing '''
         # Postprocessing
@@ -83,6 +84,7 @@ class TLDA():
         if learning_rate is None:
             learning_rate = self.learning_rate
         self.factors_ -= learning_rate*cumulant_gradient(self.factors_, X_batch, self.alpha_0,self.theta)
+        self.factors_ /= tl.norm(self.factors_, axis=0)
 
     def fit(self, X, pca=None, M1=None,vocab=None,verbose = True):
         '''Update the factors directly from X using stochastic gradient descent
@@ -100,9 +102,7 @@ class TLDA():
             prev_fac = tl.copy(self.factors_)
             for j in range(0, len(X), self.batch_size):
                 y  = X[j:j+self.batch_size]
-                lr = self.learning_rate
-                self.factors_ -= lr*cumulant_gradient(self.factors_, y, self.alpha_0, self.theta)
-                self.factors_ /= tl.norm(self.factors_, axis=0)
+                self.partial_fit(y)
 
             max_diff = tl.max(tl.abs(self.factors_ - prev_fac))
             i += 1
