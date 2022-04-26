@@ -130,9 +130,11 @@ dmypy.json
 
 # data files
 
-version0_20/scatter*
-version0_15/scatter*
-version0_20/true*
-version0_20/syn*
-MeTooReplication/
+MeTooReplication/version0_20/scatter*
+MeTooReplication/version0_15/scatter*
+MeTooReplication/version0_20/true*
+MeTooReplication/version0_20/syn*
+MeTooReplication/data/
+MeTooReplication/results/
+MeTooReplication/plots/
 
