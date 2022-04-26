@@ -7,7 +7,7 @@ import cupy as cp
 import numpy as np
 import pickle
 import file_operations as fop
-if(tl.get_backend() == "cuda"):
+if(tl.get_backend() == "cupy"):
     from cupyx.scipy.special import gamma
 else:
     from scipy.stats import gamma
@@ -37,7 +37,7 @@ def loss_rec(factor, cumulant, theta):
 class TLDA():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1,  ortho_loss_criterion = 1000,seed=None, dl = None): # we could try to find a more informative name for alpha_0
         
-        if(tl.get_backend() == "cuda"):
+        if(tl.get_backend() == "cupy"):
             cp.random.seed(seed)
         else:
             np.random.seed(seed)
