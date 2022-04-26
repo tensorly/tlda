@@ -143,7 +143,7 @@ class TLDA():
         n_docs = X_batch.shape[0]
 
         gammad = tl.tensor(gamma.rvs(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
-        exp_elogthetad = tl.tensor(cp.exp(tl_util.dirichlet_expectation(gammad))) #ndocs, n_topics
+        exp_elogthetad = tl.tensor(tl.exp(tl_util.dirichlet_expectation(gammad))) #ndocs, n_topics
         phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-100) #ndoc X nvocab
         max_gamma_change = 1.0
 
