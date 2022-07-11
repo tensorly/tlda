@@ -5,14 +5,14 @@ try:
 except ImportError:
     pass
 
-class PCA():
-    def __init__(self, n_eigenvec, alpha_0, batch_size,backend="numpy"): # n_eigenvec here corresponds to n_topic in the LDA
+class SecondOrderCumulant():
+    def __init__(self, n_eigenvec, alpha_0, batch_size): # n_eigenvec here corresponds to n_topic in the LDA
         self.n_eigenvec = n_eigenvec
         self.alpha_0 = alpha_0
         self.batch_size = batch_size
-        if backend == "numpy":
+        if tl.get_backend() == "numpy":
             self.pca = IncrementalPCA(n_components = self.n_eigenvec, batch_size = self.batch_size)
-        elif backend  == "cupy":
+        elif tl.get_backend()  == "cupy":
             self.pca = cuml.IncrementalPCA(n_components = self.n_eigenvec, batch_size = self.batch_size)
 
 

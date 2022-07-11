@@ -1,19 +1,31 @@
-import math
 import tensorly as tl
 from   version0_99.cumulant_gradient import cumulant_gradient
 import version0_99.tensor_lda_util as tl_util
 import numpy as np
-import pickle
-import version0_99.file_operations as fop
 # if(tl.get_backend() == "cupy"):
-import cupy as cp
+try:
+    import cupy as cp
+except ImportError:
+    pass
 
 
+class ThirdOrderCumulant():
+    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, 
+                 learning_rate, cumulant = None, gamma_shape=1.0, smoothing=1e-6,
+                 theta=1, ortho_loss_criterion=1000, seed=None): # we could try to find a more informative name for alpha_0
+        """"
+        Computes the third order cumulant from centered, whitened batches of data, returns the learn factorized cumulant
 
-
-class TLDA():
-    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1,  ortho_loss_criterion = 1000,seed=None, dl = None): # we could try to find a more informative name for alpha_0
-        
+        Parameters
+        ----------
+        n_topic : 
+        alpha_0 : 
+        n_iter_train : int
+        n_iter_test : int
+        batch_size : int
+        learning_rate : float
+        cumulant : 
+        """
         if(tl.get_backend() == "cupy"):
             cp.random.seed(seed)
         else:
@@ -141,7 +153,7 @@ class TLDA():
 
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
         exp_elogthetad = tl.tensor(tl.exp(tl_util.dirichlet_expectation(gammad))) #ndocs, n_topics
-        phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-100) #ndoc X nvocab
+        phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20) #ndoc X nvocab
         max_gamma_change = 1.0
 
         iter = 0
