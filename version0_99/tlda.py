@@ -7,16 +7,12 @@ import pickle
 import version0_99.file_operations as fop
 # if(tl.get_backend() == "cupy"):
 import cupy as cp
-from cupyx.scipy.special import gamma
-# else:
-from scipy.stats import gamma
-from version0_99.pca import PCA
-from pathlib import path
+
 
 
 
 class TLDA():
-    def __init__(self, n_topic, alpha_0,M1,W,n_iter_train, n_iter_test, batch_size_grad,batch_size_pca, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1,  ortho_loss_criterion = 1000,seed=None, dl = None): # we could try to find a more informative name for alpha_0
+    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, learning_rate, cumulant = None, gamma_shape = 1.0, smoothing = 1e-6,theta=1,  ortho_loss_criterion = 1000,seed=None, dl = None): # we could try to find a more informative name for alpha_0
         
         if(tl.get_backend() == "cupy"):
             cp.random.seed(seed)
@@ -27,19 +23,17 @@ class TLDA():
         self.alpha_0 = alpha_0
         self.n_iter_train = n_iter_train
         self.n_iter_test  = n_iter_test
-        self.batch_size   = batch_size_grad
+        self.batch_size   = batch_size
         self.learning_rate = learning_rate
         self.gamma_shape = gamma_shape
         self.smoothing   = smoothing
         self.theta       =  theta
         self.weights_    = tl.ones(self.n_topic)
         self.cumulant    = cumulant
-        self.M1          = M1
-        self.W           = W
-        self.doc_count   = 0
-        self.pca         = PCA(n_eigenvec=n_topic, alpha_0=alpha_0, batch_size=batch_size_pca,backend=tl.get_backend())
         
         # Initial values 
+        log_norm_std = 1e-5
+        log_norm_mean = alpha_0
         ortho_loss = ortho_loss_criterion+1 # initializing the ortho loss
         i = 1
         # Finding optimal starting values based on orthonormal inits:
@@ -72,72 +66,22 @@ class TLDA():
 
         return factors_unwhitened
         
-    def partial_fit(self, X_batch, learning_rate = None,f=None,directory_save =None,verbose=False):
+    def partial_fit(self, X_batch, learning_rate = None):
         '''Update the factors directly from the batch using stochastic gradient descent
 
         Parameters
         ----------
-        X_batch : ndarray of shape (number_documents, n_words) feed in raw data
+        X_batch : ndarray of shape (number_documents, num_topics) equal to the whitened
+            word counts in each document in the documents used to update the factors
 
         verbose : bool, optional
             if True, print information about every 200th iteration
         '''
-        # Update Mean
-        previous_doc_count =  self.doc_count
-        self.doc_count    += X_batch.shape[2]
-        self.M1 = (self.M1*previous_doc_count + tl.mean(X_batch,axis=0)) /self.doc_count 
-        
-        # Update W
-        X = X_batch-self.M1
-        
-
-        # Whiten the Data
-        self.W = self.pca.partial_fit(X) 
-
-        # Save Whitened Data to be called later, index it, and store index, give user choice to store in memory or save?
-        X_w = tl.dot(X, self.W)
-        if directory_save is None:
-            tl.concatenate([self.X_w,X_w])
-            x_list = [self.X_w]
-        else:
-            pickle.dump(X_w,open(directory_save+Path(f),'wb'))
-            x_list = fop.get_files_in_dir(directory_save)
-
-        # incremental version loading in all -i steps and then run to convergence. 
-        for x_file in x_list:
-            if directory_save is not None:
-                x_mat   = pickle.load(directory_save + Path(x_file))
-            else:
-                x_mat = x_file
-    
-            if learning_rate is None:
-                learning_rate = self.learning_rate
-    
-            tol = 1e-7 
-            i   = 1
-            max_diff = tol+1
-            print("Fitting") 
-            while (i <= 10 or max_diff >= tol) and i < self.n_iter_train:
-                prev_fac = tl.copy(self.factors_)
-                for j in range(0, len(x_mat), self.batch_size):
-                    y  = x_mat[j:j+self.batch_size]
-                    self.factors_ -= learning_rate*cumulant_gradient(self.factors_, y, self.alpha_0,self.theta)
-                    self.factors_ /= tl.norm(self.factors_, axis=0)
-                max_diff = tl.max(tl.abs(self.factors_ - prev_fac))
-                i += 1
-                if verbose and i%5 ==0:
-                    print(str(i)+"'th iteration complete. Maximum change in factors: "+str(max_diff))
-
-        print("Total iterations: " + str(i))
-        eig_vals = tl.tensor([tl.norm(k)**3 for k in self.factors_ ])
-        # normalize beta
-        alpha           = eig_vals**(-2)
-        alpha_norm      = (alpha / alpha.sum()) * self.alpha_0
-        self.weights_   = tl.tensor(alpha_norm)
-
-
-
-
+        # incremental version
+        if learning_rate is None:
+            learning_rate = self.learning_rate
+        self.factors_ -= learning_rate*cumulant_gradient(self.factors_, X_batch, self.alpha_0,self.theta)
+        self.factors_ /= tl.norm(self.factors_, axis=0)
 
     def fit(self, X, pca=None, M1=None,vocab=None,verbose = True):
         '''Update the factors directly from X using stochastic gradient descent
@@ -147,19 +91,6 @@ class TLDA():
         X : ndarray of shape (number_documents, num_topics) equal to the whitened
             word counts in each document in the documents used to update the factors
         '''
-        # Update Mean
-
-        self.M1 = tl.mean(X,axis=0) 
-        
-        # Update W
-        X = X-self.M1
-        
-        # Whiten the Data
-        self.W = self.pca.partial_fit(X) 
-
-        # Save Whitened Data to be called later, index it, and store index, give user choice to store in memory or save?
-        X = tl.dot(X, self.W)
-
         tol = 1e-7 
         i   = 1
         max_diff = tol+1
@@ -208,7 +139,7 @@ class TLDA():
         n_topics = len(self.weights_)
         n_docs = X_batch.shape[0]
 
-        gammad = tl.tensor(gamma.rvs(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
+        gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
         exp_elogthetad = tl.tensor(tl.exp(tl_util.dirichlet_expectation(gammad))) #ndocs, n_topics
         phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-100) #ndoc X nvocab
         max_gamma_change = 1.0
