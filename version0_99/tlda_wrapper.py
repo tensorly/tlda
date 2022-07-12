@@ -2,8 +2,6 @@ import tensorly as tl
 from version0_99.second_order_cumulant import SecondOrderCumulant
 from version0_99.third_order_cumulant import ThirdOrderCumulant
 
-
-
 class TLDA():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate, pca_batch_size=10000, third_order_cumulant_batch=1000 , cumulant = None, gamma_shape = 1.0, smoothing = 1e-6, theta=1,  ortho_loss_criterion = 1000,seed=None):
         
