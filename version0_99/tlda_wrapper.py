@@ -19,7 +19,7 @@ class TLDA():
         self.second_order = SecondOrderCumulant(n_topic, alpha_0, pca_batch_size)
         self.third_order  = ThirdOrderCumulant(n_topic, alpha_0, n_iter_train, n_iter_test, third_order_cumulant_batch, learning_rate, cumulant, gamma_shape, theta, ortho_loss_criterion, seed)
 
-    def fit(self,X, predict=True):
+    def fit(self,X):
         self.n_documents = X.shape[0]
         self.vocab = X.shape[1]
         self.mean = tl.mean(X, axis=0)
@@ -67,7 +67,7 @@ class TLDA():
         factors_unwhitened /= factors_unwhitened.sum(axis=0)
 
         if predict:
-            predicted_topics = self.third_order.predict(X)
+            predicted_topics = self.third_order.predict(X, self.weights_)
             return factors_unwhitened, predicted_topics
         
         return factors_unwhitened
