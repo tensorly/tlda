@@ -11,7 +11,7 @@ except ImportError:
 
 class ThirdOrderCumulant():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, 
-                 learning_rate, cumulant = None, gamma_shape=1.0, smoothing=1e-6,
+                 learning_rate, cumulant = None, gamma_shape=1.0,
                  theta=1, ortho_loss_criterion=1000, seed=None): # we could try to find a more informative name for alpha_0
         """"
         Computes the third order cumulant from centered, whitened batches of data, returns the learn factorized cumulant
@@ -38,9 +38,8 @@ class ThirdOrderCumulant():
         self.batch_size   = batch_size
         self.learning_rate = learning_rate
         self.gamma_shape = gamma_shape
-        self.smoothing   = smoothing
+        # self.smoothing   = smoothing
         self.theta       =  theta
-        self.weights_    = tl.ones(self.n_topic)
         self.cumulant    = cumulant
         
         # Initial values 
@@ -61,22 +60,6 @@ class ThirdOrderCumulant():
    
         self.factors_ = init_values
     
-    def postprocess(self,pca,M1,vocab):
-        '''Post-Processing '''
-        # Postprocessing
-        factors_unwhitened = pca.reverse_transform(self.factors_.T).T 
-
-        #decenter the data
-        factors_unwhitened += tl.reshape(M1,(vocab,1))
-        factors_unwhitened [factors_unwhitened  < 0.] = 0. # remove non-negative probabilities
-        
-        # smooth beta
-        factors_unwhitened *= (1. - self.smoothing)
-        factors_unwhitened += (self.smoothing / factors_unwhitened.shape[1])
-        factors_unwhitened /= factors_unwhitened.sum(axis=0)
-
-
-        return factors_unwhitened
         
     def partial_fit(self, X_batch, learning_rate = None):
         '''Update the factors directly from the batch using stochastic gradient descent
@@ -95,7 +78,7 @@ class ThirdOrderCumulant():
         self.factors_ -= learning_rate*cumulant_gradient(self.factors_, X_batch, self.alpha_0,self.theta)
         self.factors_ /= tl.norm(self.factors_, axis=0)
 
-    def fit(self, X, pca=None, M1=None,vocab=None,verbose = True):
+    def fit(self, X, verbose = True):
         '''Update the factors directly from X using stochastic gradient descent
 
         Parameters
@@ -119,18 +102,9 @@ class ThirdOrderCumulant():
                 print(str(i)+"'th iteration complete. Maximum change in factors: "+str(max_diff))
 
         print("Total iterations: " + str(i))
-        eig_vals = tl.tensor([tl.norm(k)**3 for k in self.factors_ ])
-        # normalize beta
-        alpha           = eig_vals**(-2)
-        alpha_norm      = (alpha / alpha.sum()) * self.alpha_0
-        self.weights_   = tl.tensor(alpha_norm)
-        
-        # Convert whitened factors into word-topic probabilities
-        if pca is not None and M1 is not None:
-            self.factors_ = self.postprocess(pca,M1,vocab)
 
 
-    def _predict_topic(self, X_batch):
+    def _predict_topic(self, X_batch, weights):
         '''Infer the document-topic distribution vector for a given document
 
         Parameters
@@ -148,7 +122,7 @@ class ThirdOrderCumulant():
         '''
 
         # factors = nvocab x ntopics
-        n_topics = len(self.weights_)
+        n_topics = self.n_topic
         n_docs = X_batch.shape[0]
 
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
@@ -159,7 +133,7 @@ class ThirdOrderCumulant():
         iter = 0
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
-            gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.factors_.T))) + self.weights_) # estimate for the variational mixing param
+            gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.factors_.T))) + weights) # estimate for the variational mixing param
             exp_elogthetad = tl.exp(tl_util.dirichlet_expectation(gammad))
             phinorm        = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20)
 
@@ -169,7 +143,7 @@ class ThirdOrderCumulant():
 
         return gammad
 
-    def predict(self, X_test):
+    def predict(self, X_test, weights):
         '''Infer the document/topic distribution from the factors and weights and
         make the factor non-negative
 
@@ -187,7 +161,7 @@ class ThirdOrderCumulant():
                  adjusted factor
         '''
 
-        gammad_l = self._predict_topic(X_test)
+        gammad_l = self._predict_topic(X_test, weights)
         gammad_norm  = tl.exp([tl_util.dirichlet_expectation(g) for g in gammad_l])
         gammad_norm2 = gammad_norm/tl.reshape(tl.sum(gammad_norm,axis=1),(-1,1))
 
