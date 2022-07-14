@@ -11,7 +11,7 @@ except ImportError:
 
 class ThirdOrderCumulant():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, 
-                 learning_rate, cumulant = None, gamma_shape=1.0,
+                 learning_rate, gamma_shape=1.0,
                  theta=1, ortho_loss_criterion=1000, seed=None): # we could try to find a more informative name for alpha_0
         """"
         Computes the third order cumulant from centered, whitened batches of data, returns the learn factorized cumulant
@@ -54,7 +54,7 @@ class ThirdOrderCumulant():
             else:
                 init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
             init_values, _ = tl.qr(init_values, mode='reduced')
-            _, ortho_loss, _ = tl_util.loss_rec(init_values, cumulant, self.theta)
+            _, ortho_loss, _ = tl_util.loss_rec(init_values, self.theta)
             i += 1
             self.theta -= 0.1		
    
