@@ -1,5 +1,5 @@
 import tensorly as tl
-from   cumulant_gradient import cumulant_gradient
+from   .cumulant_gradient import cumulant_gradient
 import tensor_lda_util as tl_util
 import numpy as np
 # if(tl.get_backend() == "cupy"):
