@@ -22,6 +22,7 @@ class TLDA():
         self.n_topic   = n_topic
         self.alpha_0   = alpha_0
         self.smoothing = smoothing
+        self.third_order_cumulant_batch = third_order_cumulant_batch
         
         self.weights_  = tl.ones(self.n_topic)
         self.vocab = 0
