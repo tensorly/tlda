@@ -158,6 +158,7 @@ class ThirdOrderCumulant():
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
         exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
         phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20) #ndoc X nvocab
+        print(phinorm.shape[1])
         max_gamma_change = 1.0
         iter = 0
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
