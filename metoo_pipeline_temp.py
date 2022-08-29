@@ -123,7 +123,7 @@ ortho_loss_param = 40
 split_files    = 0
 vocab_build    = 0 
 save_files     = 0
-stgd           = 0
+stgd           = 1
 transform_data = 1
 coherence   = 0
 
@@ -315,7 +315,7 @@ if transform_data == 1:
         mempool.free_all_blocks()            
         pinned_mempool = cp.get_default_pinned_memory_pool()
         pinned_mempool.free_all_blocks()
-        print("Beginning TLDA: " + f)
+        print("Beginning Document Fitting: " + f)
         # cp.ndarray.get(
         X_batch = pickle.load(
                     open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','rb')
