@@ -12,7 +12,7 @@ except ImportError:
 
 def dirichlet_expectation(alpha):
     '''Normalize alpha using the dirichlet distribution'''
-    return tl.digamma(alpha) - tl.digamma(sum(alpha)) # fix this
+    return cpsci.digamma(alpha) - cpsci.digamma(sum(alpha)) # fix this
 
 def loss_rec(factor, theta):
     '''Inputs:
