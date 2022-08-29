@@ -1,13 +1,9 @@
+import pickle
+from pathlib import Path
 import tensorly as tl
+
 from .second_order_cumulant import SecondOrderCumulant
 from .third_order_cumulant import ThirdOrderCumulant
-
-import file_operations as fop
-try:
-    import pickle
-    from pathlib import Path
-except ImportError:
-    pass
 
 class TLDA():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate, 
