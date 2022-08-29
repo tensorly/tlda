@@ -68,7 +68,7 @@ class TLDA():
     def _partial_fit_third_order(self, X_batch):
         for j in range(0, len(X_batch), self.third_order_cumulant_batch):
             y  = X_batch[j:j+self.third_order_cumulant_batch]
-            self.third_order.partial_fit(y - self.mean, verbose=False)
+            self.third_order.partial_fit(y, verbose=False) 
 
     def partial_fit(self, X_batch, batch_index, save_folder=None):
         """
