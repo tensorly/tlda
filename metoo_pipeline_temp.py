@@ -108,9 +108,9 @@ inDir  = "/raid/debanks/MeToo/data/MeTooMonthCleaned" # MeTooMonthCleaned" # inp
 # Learning parameters
 num_tops = 100 #100 # 50 topics :(931, 93, 1258) coherence: 2277 (lr=0.00003 )
 alpha_0 = 0.01
-batch_size_pca  = 200000  # this will handle 2000 words + 100 topics ad infinite number of documents 
+batch_size_pca  = 100000  # this will handle 2000 words + 100 topics ad infinite number of documents 
 #batch_size_pca  = 5000 # for whitening
-batch_size_grad = 250000 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
+batch_size_grad = 25000 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
 n_iter_train    = 1000
 n_iter_test     = 1
 # 0.0005
