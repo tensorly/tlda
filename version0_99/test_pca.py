@@ -1,7 +1,7 @@
-from ..tlda_wrapper import TLDA
+from tlda_wrapper import TLDA
 import tensorly as tl
 from tensorly.testing import assert_array_almost_equal
-from tensorly.tenalg.core_tenalg.tensor_product import batched_tensor_dot
+from tensorly.tenalg import batched_outer
 
 def test_pca():
     a = tl.tensor([[2, 1, 0, 1, 5],
@@ -23,7 +23,9 @@ def test_pca():
     a_cent = a - tlda.mean
 
     # check that WT M2 W = I
-    M2 = (alpha_0 + 1)*tl.mean(batched_tensor_dot(a_cent, a_cent), axis=0)
+    # Tell jean to fix the documentation for Tensorly batched_outer, 
+    # we need a list of tensors -- documentation not clear
+    M2 = (alpha_0 + 1)*tl.mean(batched_outer([a_cent, a_cent]), axis=0)
     W = tlda.second_order.projection_weights_ / tl.sqrt(tlda.second_order.whitening_weights_)[None, :]
     res = tl.dot(tl.dot(W.T, M2), W)
     

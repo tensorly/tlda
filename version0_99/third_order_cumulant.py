@@ -1,6 +1,6 @@
 import tensorly as tl
-from   version0_99.cumulant_gradient import cumulant_gradient
-import version0_99.tensor_lda_util as tl_util
+from   cumulant_gradient import cumulant_gradient
+import tensor_lda_util as tl_util
 import numpy as np
 # if(tl.get_backend() == "cupy"):
 try:
@@ -40,7 +40,7 @@ class ThirdOrderCumulant():
         self.gamma_shape = gamma_shape
         # self.smoothing   = smoothing
         self.theta       =  theta
-        self.cumulant    = cumulant
+        # self.cumulant    = cumulant
         
         # Initial values 
         log_norm_std = 1e-5
@@ -54,7 +54,7 @@ class ThirdOrderCumulant():
             else:
                 init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
             init_values, _ = tl.qr(init_values, mode='reduced')
-            _, ortho_loss, _ = tl_util.loss_rec(init_values, self.theta)
+            ortho_loss = tl_util.loss_rec(init_values, self.theta)
             i += 1
             self.theta -= 0.1		
    

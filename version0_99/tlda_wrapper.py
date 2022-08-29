@@ -1,7 +1,7 @@
 import tensorly as tl
-from version0_99.second_order_cumulant import SecondOrderCumulant
-from version0_99.third_order_cumulant import ThirdOrderCumulant
-import version0_99.file_operations as fop
+from second_order_cumulant import SecondOrderCumulant
+from third_order_cumulant import ThirdOrderCumulant
+import file_operations as fop
 try:
     import pickle
     from pathlib import Path
