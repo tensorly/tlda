@@ -158,7 +158,6 @@ class ThirdOrderCumulant():
         exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
         phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20) #ndoc X nvocab
         max_gamma_change = 1.0
-        print(phinorm.shape) 
         iter = 0
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
