@@ -1,7 +1,8 @@
-import tensorly as tl
-from   .cumulant_gradient import cumulant_gradient
 import numpy as np
-# if(tl.get_backend() == "cupy"):
+import tensorly as tl
+
+from  .cumulant_gradient import cumulant_gradient
+
 try:
     import cupy as cp
 except ImportError:
