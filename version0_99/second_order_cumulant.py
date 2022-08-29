@@ -10,9 +10,12 @@ class SecondOrderCumulant():
 
     Parameters
     ----------
-
-    Returns
-    -------
+    n_eigenvec : int
+        Corresponds to the number of topics in the Tensor LDA
+    alpha_0 : int
+        Mixing parameter for the topic weights
+    batch_size : int
+        Size of the mini-batch to use for the online learning
     """
     def __init__(self, n_eigenvec, alpha_0, batch_size): # n_eigenvec here corresponds to n_topic in the LDA
         self.n_eigenvec = n_eigenvec
@@ -30,7 +33,8 @@ class SecondOrderCumulant():
 
         Parameters
         ----------
-        X : tensor containing all input documents
+        X : tensor of shape (n_samples, vocabulary_size)
+            Tensor containing all input documents
         '''
         self.pca.fit(X*tl.sqrt(self.alpha_0+1))
         self.projection_weights_ = tl.transpose(self.pca.components_)
@@ -43,7 +47,8 @@ class SecondOrderCumulant():
 
         Parameters
         ----------
-        X_batch : tensor containing a batch of input documents
+        X_batch : tensor of shape (batch_size, vocabulary_size)
+            Tensor containing a batch of input documents
         '''
         self.pca.partial_fit(X_batch*tl.sqrt(self.alpha_0+1))
         self.projection_weights_ = tl.transpose(self.pca.components_)
@@ -54,7 +59,13 @@ class SecondOrderCumulant():
 
         Parameters
         ----------
-        X : centered input tensor
+        X : tensor of shape (batch_size, vocabulary_size)
+            Batch of centered samples
+
+        Returns
+        -------
+        whitened_X : tensor of shape (batch_size, self.n_eigenvec)
+            Whitened samples 
         '''
         return tl.dot(X, (self.projection_weights_ / tl.sqrt(self.whitening_weights_)[None, :]))
 
@@ -63,7 +74,13 @@ class SecondOrderCumulant():
 
         Parameters
         ----------
-        X : whitened input tensor
+        X : tensor of shape (batch_size, self.n_eigenvec)
+            whitened input tensor
+
+        Returns
+        -------
+        unwhitened_X : tensor of shape (batch_size, vocabulary_size)
+            Batch of unwhitened centered samples
         '''
         return tl.dot(X, (self.projection_weights_ * tl.sqrt(self.whitening_weights_)).T)
         #return tl.dot(X, (self.projection_weights_ / tl.sqrt(self.whitening_weights_)[None, :]).T)

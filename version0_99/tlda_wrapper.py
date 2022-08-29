@@ -30,6 +30,7 @@ class TLDA():
         self.vocab = 0
         self.n_documents = 0
         self.mean = None
+        self.unwhitened_factors_ = None
 
         self.second_order = SecondOrderCumulant(n_topic, alpha_0, pca_batch_size)
         self.third_order  = ThirdOrderCumulant(n_topic, alpha_0, n_iter_train, n_iter_test, third_order_cumulant_batch,
@@ -134,36 +135,54 @@ class TLDA():
         X_batch = self.second_order.transform(X_batch - self.mean)
         self._partial_fit_third_order(X_batch)
 
-    def transform(self, X, predict = True):
+    def _unwhiten_factors(self):
+        """Unwhitens self.third_order.factors_, then uncenters and unnormalizes"""
+        factors_unwhitened = self.second_order.reverse_transform(self.third_order.factors_.T).T 
+
+        # Un-centers the data
+        factors_unwhitened += tl.reshape(self.mean,(self.vocab,1))
+        factors_unwhitened [factors_unwhitened  < 0.] = 0. # remove non-negative probabilities
+        
+        # Smoothing
+        factors_unwhitened *= (1. - self.smoothing)
+        factors_unwhitened += (self.smoothing / factors_unwhitened.shape[1])
+
+        # Calculate the eigenvalues from the whitened factors
+        eig_vals = tl.tensor([tl.norm(k)**3 for k in self.third_order.factors_ ])
+        alpha           = eig_vals**(-2)
+        # Recover the topic weights 
+        alpha_norm      = (alpha / alpha.sum()) * self.alpha_0
+        self.weights_   = tl.tensor(alpha_norm)
+
+        # Normalize the factors
+        factors_unwhitened /= factors_unwhitened.sum(axis=0)
+        return factors_unwhitened
+
+    @property
+    def unwhitened_factors(self):
+        """Unwhitened learned factors of shape (n_topic, vocabulary_size)
+
+        On the first call, this will compute and store the unwhitened factors.
+        Subsequent calls will simply return the stored value. 
+        """
+        if self.self.unwhitened_factors_ is None:
+            self.unwhitened_factors_ = self._unwhiten_factors()
+        else:
+            return self.unwhitened_factors_
+
+    def transform(self, X=None, predict=True):
         """
         Transform the document-word matrix of a set of documents into a word-topic distribution and topic-distribution when predict=True.
 
         Parameters
         ----------  
-        X: tensor of shape (n_documents , self.vocab) set of documetns to predict topic distribution
-        predict: logical: logical to indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. 
+        X : tensor of shape (n_documents , self.vocab) 
+            set of documetns to predict topic distribution
+        predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. 
         """
-
-        # Postprocessing
-        factors_unwhitened = self.second_order.reverse_transform(self.third_order.factors_.T).T 
-
-        #decenter the data
-        factors_unwhitened += tl.reshape(self.mean,(self.vocab,1))
-        factors_unwhitened [factors_unwhitened  < 0.] = 0. # remove non-negative probabilities
-        
-        # smooth beta
-        factors_unwhitened *= (1. - self.smoothing)
-        factors_unwhitened += (self.smoothing / factors_unwhitened.shape[1])
-
-        eig_vals = tl.tensor([tl.norm(k)**3 for k in self.third_order.factors_ ])
-        alpha           = eig_vals**(-2)
-        alpha_norm      = (alpha / alpha.sum()) * self.alpha_0
-        self.weights_   = tl.tensor(alpha_norm)
-
-        factors_unwhitened /= factors_unwhitened.sum(axis=0)
 
         if predict:
             predicted_topics = self.third_order.predict(X, self.weights_)
-            return factors_unwhitened, predicted_topics
+            return self.factors_unwhitened, predicted_topics
         
-        return factors_unwhitened
+        return self.factors_unwhitened

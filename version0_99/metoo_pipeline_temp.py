@@ -22,47 +22,26 @@ from cudf import Series
 from cuml.feature_extraction.text import CountVectorizer
 from cuml.preprocessing.text.stem import PorterStemmer
 import cupyx 
-# from sklearn.feature_extraction.text import CountVectorizer
-# from nltk.stem import PorterStemmer
 
 #Insert Plotly
-#import matplotlib.pyplot as plt
 import pandas as pd
 import time
 import pickle
 
 # Import utility functions from other files
 from version0_99.tlda_wrapper import TLDA
-# from version0_99.pca        import PCA
-# import tensor_lda_mid as tlda_mid
-# import test_util_validation
-# import tensor_lda_util as tl_util
 import version0_99.file_operations as fop
 
-# class StemTokenizer(object):
-#     def __init__(self):
-#         self.porter = PorterStemmer()
-#     def __call__(self, articles):
-#         return [self.porter.stem(t) for t in word_tokenize(articles)]
 
 
 # Constants
-MONTHS = "5M"
-X_MAT_FILEPATH_PREFIX = '/Users/skangaslahti/tlda/data/Meena_testing/x_mat/' # path to store the document-term matrix
-COUNTVECTOR_FILEPATH  = '/Users/skangaslahti/tlda/data/Meena_testing/countvec_1M.obj' # store the count vectorizer and the tokens
-M1_FILEPATH           = '/Users/skangaslahti/tlda/data/Meena_testing/M1.obj' # store first moment ie the mean
-PCA_FILEPATH          = '/Users/skangaslahti/tlda/data/Meena_testing/pca.obj' # store the results from the first PCA on M1
-PCA_PROJ_WEIGHTS_FILEPATH      = '/Users/skangaslahti/tlda/data/Meena_testing/pca_proj_weights.obj' # Store the projectin weights from PCA
-PCA_WHITENING_WEIGHTS_FILEPATH = '/Users/skangaslahti/tlda/data/Meena_testing/pca_whitening_weights.obj' # store the whitening weight from PCA
-X_WHITENED_FILEPATH = '/Users/skangaslahti/tlda/data/Meena_testing/x_whit.obj' # Store the whitened data
-TLDA_FILEPATH       = '/Users/skangaslahti/tlda/data/Meena_testing/tlda_metoo_comparison.obj' # store the TLDA object
-WEIGHTS_FILEPATH    = '/Users/skangaslahti/tlda/data/Meena_testing/weights_tlda.txt'
-PREPROCESS_FACTORS_METOO_FILEPATH = '/Users/skangaslahti/tlda/data/Meena_testing/preprocess_factors_MeToo.obj' # save pre-processed factors
-POST_FACTORS_METOO_FILEPATH       = '/Users/skangaslahti/tlda/data/Meena_testing/postprocess_factors_MeToo.obj' # save post-process factors
-TOP_WORDS_FILEPATH                = '/Users/skangaslahti/tlda/data/top_words.csv' # save the top words per topic
-VOCAB_FILEPATH                    = '/Users/skangaslahti/tlda/data/vocab.csv' # save the vocab
-TOTAL_DATA_ROWS_FILEPATH          = '/Users/skangaslahti/tlda/data/total_data_rows.obj'  # save length of data. 
-TOPIC_FILEPATH_PREFIX = '/Users/skangaslahti/tlda/data/Meena_testing/predicted_topics/'
+
+X_MAT_FILEPATH_PREFIX = '/raid/debanks/MeToo/data/x_mat/' # path to store the document-term matrix
+COUNTVECTOR_FILEPATH  = '/raid/debanks/MeToo/data/countvec_1M.obj' # store the count vectorizer and the tokens
+TLDA_FILEPATH       = '/raid/debanks/MeToo/data/tlda_metoo_comparison.obj' # store the TLDA object
+VOCAB_FILEPATH                    = '/raid/debanks/MeToo/data/vocab.csv' # save the vocab
+TOPIC_FILEPATH_PREFIX   = '/raid/debanks/MeToo/data/predicted_topics/'
+DOCUMENT_TOPIC_FILEPATH = '/raid/debanks/MeToo/data/dtm.csv'
 
 # Device settings
 backend="cupy"
@@ -124,7 +103,7 @@ countvec = CountVectorizer( stop_words = stop_words, # works
                             min_df = 0.005)# 2000) ## limit this to 20 ## 2500 for 8M
 
 
-inDir  = "/Users/skangaslahti/tlda/data/split_files" # MeTooMonthCleaned" # input('Name of input directory? : ')
+inDir  = "/raid/debanks/MeToo/data/MeTooMonthCleaned" # MeTooMonthCleaned" # input('Name of input directory? : ')
 
 # Learning parameters
 num_tops = 100 #100 # 50 topics :(931, 93, 1258) coherence: 2277 (lr=0.00003 )
@@ -141,12 +120,11 @@ smoothing   = 1e-5
 ortho_loss_param = 40
 
 # Program controls
-split_files = 0
-vocab_build = 1
-save_files  = 1
-pca_run     = 1
-whiten      = 1
-stgd        = 1
+split_files    = 1
+vocab_build    = 1
+save_files     = 1
+stgd           = 1
+transform_data = 1
 coherence   = 0
 
 # Other globals
@@ -176,7 +154,7 @@ if split_files == 1:
     inDir = fop.split_files(
         inDir, 
         os.path.join(
-            "/Users/skangaslahti/tlda/data", 
+            "/raid/debanks/MeToo/data", 
             "split_files"),
         size_threshold = 100000000
     )
@@ -230,11 +208,8 @@ if vocab_build == 1:
         df   = basic_clean(df)
 
         X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
-        M1_sum += tl.sum(X_batch, axis=0)
         print(X_batch.shape[0])
-        len_arr.append(X_batch.shape[0])
-        tot_len += X_batch.shape[0]
-        print(str(tot_len))
+
         if save_files == 1:
             pickle.dump(
                 (X_batch), 
@@ -242,16 +217,10 @@ if vocab_build == 1:
             )
         print("End " + f)
 
-    # M1 = M1_sum/tot_len
-    print(len_arr)
-    print("Total length of dataset: {} rows".format(str(tot_len)))
-
     df_voc = cudf.DataFrame({'words':countvec.vocabulary_})
     df_voc.to_csv(VOCAB_FILEPATH)
 
     pickle.dump(countvec, open(COUNTVECTOR_FILEPATH, 'wb'))
-    # pickle.dump(M1, open(M1_FILEPATH, 'wb'))
-    pickle.dump(tot_len, open(TOTAL_DATA_ROWS_FILEPATH, 'wb'))
     # del M1_sum
     del X_batch 
     del df
@@ -279,7 +248,6 @@ tlda = TLDA(
 gc.collect()
 if stgd == 1:
     t1 = time.time()
-    x_whits = []
     for f in dl:
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()            
@@ -300,11 +268,11 @@ if stgd == 1:
         pinned_mempool.free_all_blocks()
         
         t1 = time.time()
-        for j in range(0, max(1, len(X_batch)-(batch_size_pca-1)), batch_size_pca):
-            k = j + batch_size_pca
+        for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
+            k = j + batch_size_grad
 
             # Check if remainder is undersized
-            if (len(X_batch) - k) < batch_size_pca:
+            if (len(X_batch) - k) < batch_size_grad:
                 k = len(X_batch)
             
             mempool = cp.get_default_memory_pool()
@@ -312,85 +280,82 @@ if stgd == 1:
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
             y = tl.tensor(X_batch[j:k])
-            # y = X_batch[j:k]
-            y -= M1 # center the data
-            x_whits.append(pca.transform(y))
+            
+            tlda.partial_fit_online(y)
+
             mempool = cp.get_default_memory_pool()
             mempool.free_all_blocks()            
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
 
         t2 = time.time()
-        print("New whiten time" + str(t2-t1))
-    x_whit = tl.concatenate(x_whits, axis=0)
-    print(x_whit.shape)
-    pickle.dump(x_whit, open(X_WHITENED_FILEPATH,'wb'))
+        print("New fit time" + str(t2-t1))
     t2 = time.time()
  
-    print("Whiten time: " + str(t2-t1))
+    print("Fit time: " + str(t2-t1))
+    pickle.dump(cp.asnumpy(tlda), open(TLDA_FILEPATH, 'wb'))
 
-if whiten == 0:
-    x_whit= pickle.load(open(X_WHITENED_FILEPATH,'rb'))
-gc.collect()
-if stgd == 1:
-    M3=None
-    tlda = TLDA(num_tops, alpha_0, n_iter_train,n_iter_test ,batch_size_grad ,learning_rate,cumulant = M3,gamma_shape = 1.0, smoothing = 1e-5,theta=theta_param, ortho_loss_criterion = ortho_loss_param)
-    t1 = time.time()
-    tlda.fit(x_whit,pca,M1,vocab,verbose=False)
-    t2 = time.time()
-    tlda_time =str(t2-t1)
-    print("TLDA Time: " + tlda_time)
 
-    pickle.dump(cp.asnumpy(tlda.factors_), open(TLDA_FILEPATH, 'wb'))
-    outFile = open(WEIGHTS_FILEPATH, 'w')
-    print(tlda.weights_, file=outFile)
-    print(np.argsort(cp.asnumpy(tlda.weights_))[::-1], file=outFile)
-    outFile.close()
-
+# Document Processing
+if transform_data == 1:
+    t1  = time.time()
+    dtm = None
     for f in dl:
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()            
         pinned_mempool = cp.get_default_pinned_memory_pool()
         pinned_mempool.free_all_blocks()
-    
-        print("Beginning TLDA Inference: " + f)
-
-        # cp.ndarray.get()
+        print("Beginning TLDA: " + f)
+        # cp.ndarray.get(
         X_batch = pickle.load(
                     open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','rb')
                     #open(f,'rb')
                 )
             # )
+       
+        
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()            
         pinned_mempool = cp.get_default_pinned_memory_pool()
         pinned_mempool.free_all_blocks()
         
-        predicted_topics = tlda.predict(X_batch - M1)
-        pickle.dump(cp.asnumpy(predicted_topics), open(TOPIC_FILEPATH_PREFIX + Path(f).stem + '.obj','wb'))
-'''
-if stgd == 0:
-        tlda               = pickle.load(open(TLDA_FILEPATH, 'rb'))
-n_top_words = 20
-df_voc = cudf.DataFrame({'words':countvec.vocabulary_})
-df_voc.to_csv(VOCAB_FILEPATH)
-print("tlda factors shape: " + str(tlda.factors_.shape))
-print("tlda theta: " + str(tlda.theta))
-for k in range(0,num_tops):
-    if k ==0:
-        t_n_indices   =  tlda.factors_[:,k].argsort()[:-n_top_words - 1:-1]
-        top_words_LDA = countvec.vocabulary_[t_n_indices]
-        top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
-        
-    if k >=1:
-        t_n_indices   =  tlda.factors_[:,k].argsort()[:-n_top_words - 1:-1]
-        top_words_LDA = countvec.vocabulary_[t_n_indices]
-        top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
-top_words_df.to_csv(TOP_WORDS_FILEPATH)
-del df_voc, countvec,top_words_LDA, x_whit''' 
+        t1 = time.time()
+        for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
+            k = j + batch_size_grad
+
+            # Check if remainder is undersized
+            if (len(X_batch) - k) < batch_size_grad:
+                k = len(X_batch)
+            
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()            
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
+            y = tl.tensor(X_batch[j:k])
+            
+            if dtm is not None:
+                tl.concatenate(dtm,tlda.transform(y))
+            else:
+                dtm = tlda.transform(y)
+
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()            
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
+
+        t2 = time.time()
+        print("New fit time" + str(t2-t1))
+    t2 = time.time()
+ 
+    print("Fit time: " + str(t2-t1))  
+
+    pickle.dump(cp.asnumpy(dtm), open(DOCUMENT_TOPIC_FILEPATH, 'wb'))
+
+
+
 epsilon = 1e-12
 if vocab_build == 0:
-    M1       = pickle.load(open(M1_FILEPATH,'rb'))
+    M1       = pickle.load(open(TLDA_FILEPATH, 'rb')).mean
 
 if coherence == 1:
     n_top_words = 20
@@ -411,11 +376,9 @@ if coherence == 1:
 
             i +=1
     n = X.shape[0]
-    #M1 = cp.mean(X, axis=0)
     tcm = X.T.dot(X)
     print(tcm.shape)
     numerator   = cupyx.scipy.sparse.triu(tcm, k=1)
-    #cupyx.scipy.sparse.triu(tcm, k=1)
     denominator = M1
     print(denominator.shape)
     score       = cp.log(((numerator.toarray()/n)+epsilon)/denominator)
