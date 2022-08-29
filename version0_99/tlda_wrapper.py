@@ -1,6 +1,7 @@
 import tensorly as tl
-from second_order_cumulant import SecondOrderCumulant
-from third_order_cumulant import ThirdOrderCumulant
+from .second_order_cumulant import SecondOrderCumulant
+from .third_order_cumulant import ThirdOrderCumulant
+
 import file_operations as fop
 try:
     import pickle
