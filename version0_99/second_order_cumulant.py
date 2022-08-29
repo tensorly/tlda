@@ -6,6 +6,14 @@ except ImportError:
     pass
 
 class SecondOrderCumulant():
+    """Class to compute the second order cumulant
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
     def __init__(self, n_eigenvec, alpha_0, batch_size): # n_eigenvec here corresponds to n_topic in the LDA
         self.n_eigenvec = n_eigenvec
         self.alpha_0 = alpha_0

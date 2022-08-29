@@ -10,6 +10,14 @@ except ImportError:
 
 
 class ThirdOrderCumulant():
+    """Class to compute the third order cumulant
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, 
                  learning_rate, gamma_shape=1.0,
                  theta=1, ortho_loss_criterion=1000, seed=None): # we could try to find a more informative name for alpha_0
