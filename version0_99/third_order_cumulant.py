@@ -5,13 +5,14 @@ from  .cumulant_gradient import cumulant_gradient
 
 try:
     import cupy as cp
+    import cupyx.scipy.special as cpsci
 except ImportError:
     pass
 
 
 def dirichlet_expectation(alpha):
     '''Normalize alpha using the dirichlet distribution'''
-    return tl.digamma(alpha) - tl.digamma(sum(alpha))
+    return cpsci.digamma(alpha) - cpsci.digamma(sum(alpha)) # fix this
 
 def loss_rec(factor, theta):
     '''Inputs:
