@@ -6,8 +6,6 @@ def dirichlet_expectation(alpha):
     return tl.digamma(alpha) - tl.digamma(sum(alpha))
 
 
-
-
 def loss_rec(factor, theta):
     '''Inputs:
         factor: (n_topics x n_topics): whitened factors from the SGD 

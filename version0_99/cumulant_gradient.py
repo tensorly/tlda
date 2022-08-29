@@ -17,8 +17,6 @@ def cumulant_gradient(phi, y, alpha, theta=10):
     alpha :
     theta : int, default is 1
     """
-
-    
     gradient = 3*(1 + theta)*tl.dot(phi, tl.dot(phi.T, phi)**2)
     gradient -= 3*(1 + alpha)*(2 + alpha)/(2*y.shape[0])*tl.dot(y.T, tl.dot(y, phi)**2)
     return gradient
