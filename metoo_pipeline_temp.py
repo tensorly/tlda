@@ -123,7 +123,7 @@ ortho_loss_param = 40
 split_files    = 0
 vocab_build    = 0 
 save_files     = 0
-stgd           = 1
+stgd           = 0
 transform_data = 1
 coherence   = 0
 
