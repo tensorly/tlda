@@ -121,7 +121,7 @@ ortho_loss_param = 40
 
 # Program controls
 split_files    = 0
-vocab_build    = 1
+vocab_build    = 0 
 save_files     = 1
 stgd           = 1
 transform_data = 1
@@ -319,7 +319,7 @@ if transform_data == 1:
         pinned_mempool = cp.get_default_pinned_memory_pool()
         pinned_mempool.free_all_blocks()
         
-        t1 = time.time()
+        t3 = time.time()
         for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
             k = j + batch_size_grad
 
@@ -343,8 +343,8 @@ if transform_data == 1:
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
 
-        t2 = time.time()
-        print("New fit time" + str(t2-t1))
+        t4 = time.time()
+        print("New fit time" + str(t4-t3))
     t2 = time.time()
  
     print("Fit time: " + str(t2-t1))  

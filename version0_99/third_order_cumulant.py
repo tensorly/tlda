@@ -82,7 +82,7 @@ class ThirdOrderCumulant():
             else:
                 init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
             init_values, _ = tl.qr(init_values, mode='reduced')
-            ortho_loss = tl_util.loss_rec(init_values, self.theta)
+            ortho_loss = loss_rec(init_values, self.theta)
             i += 1
             self.theta -= 0.1		
    
@@ -154,7 +154,7 @@ class ThirdOrderCumulant():
         n_docs = X_batch.shape[0]
 
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)))
-        exp_elogthetad = tl.tensor(tl.exp(tl_util.dirichlet_expectation(gammad))) #ndocs, n_topics
+        exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
         phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20) #ndoc X nvocab
         max_gamma_change = 1.0
 
@@ -162,7 +162,7 @@ class ThirdOrderCumulant():
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
             gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.factors_.T))) + weights) # estimate for the variational mixing param
-            exp_elogthetad = tl.exp(tl_util.dirichlet_expectation(gammad))
+            exp_elogthetad = tl.exp(dirichlet_expectation(gammad))
             phinorm        = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20)
 
             mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
@@ -190,7 +190,7 @@ class ThirdOrderCumulant():
         '''
 
         gammad_l = self._predict_topic(X_test, weights)
-        gammad_norm  = tl.exp([tl_util.dirichlet_expectation(g) for g in gammad_l])
+        gammad_norm  = tl.exp([dirichlet_expectation(g) for g in gammad_l])
         gammad_norm2 = gammad_norm/tl.reshape(tl.sum(gammad_norm,axis=1),(-1,1))
 
         return gammad_norm2
