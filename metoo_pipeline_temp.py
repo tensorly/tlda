@@ -122,8 +122,8 @@ ortho_loss_param = 40
 # Program controls
 split_files    = 0
 vocab_build    = 0 
-save_files     = 1
-stgd           = 1
+save_files     = 0
+stgd           = 0
 transform_data = 1
 coherence   = 0
 
@@ -293,10 +293,20 @@ if stgd == 1:
     t2 = time.time()
  
     print("Fit time: " + str(t2-t1))
-    pickle.dump(cp.asnumpy(tlda), open(TLDA_FILEPATH, 'wb'))
+    pickle.dump(tlda, open(TLDA_FILEPATH, 'wb'))
 
 
 # Document Processing
+
+if stgd == 0:
+    tlda = pickle.load(open(TLDA_FILEPATH,'rb'))
+    # M1       = pickle.load(open(M1_FILEPATH,'rb'))
+    # print("vocab: M1 shape: ", M1.shape)
+
+    print("Load TLDA")
+    # num_data_rows = 11192442# 7976703 # delete after testing
+
+
 if transform_data == 1:
     t1  = time.time()
     dtm = None
