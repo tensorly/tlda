@@ -42,6 +42,9 @@ TLDA_FILEPATH       = '/raid/debanks/MeToo/data/tlda_metoo_comparison.obj' # sto
 VOCAB_FILEPATH                    = '/raid/debanks/MeToo/data/vocab.csv' # save the vocab
 TOPIC_FILEPATH_PREFIX   = '/raid/debanks/MeToo/data/predicted_topics/'
 DOCUMENT_TOPIC_FILEPATH = '/raid/debanks/MeToo/data/dtm.csv'
+RAW_DATA_PREFIX = '/raid/debanks/MeToo/data/MeTooMonth/'
+OUT_ID_DATA_PREFIX = '/raid/debanks/MeToo/data/ids/' 
+TOP_WORDS_FILEPATH ='/raid/debanks/MeToo/data/top_words.csv'
 
 # Device settings
 backend="cupy"
@@ -124,8 +127,9 @@ split_files    = 0
 vocab_build    = 0
 save_files     = 0
 stgd           = 0
-transform_data = 0
-coherence   = 1
+transform_data    = 1
+recover_top_words = 1
+coherence         = 1
 
 # Other globals
 num_data_rows = 0
@@ -164,8 +168,9 @@ if split_files == 1:
 if vocab_build == 1:
     for i, f in enumerate(dl):
         print("Beginning vocabulary build: " + f)
-        path_in  = os.path.join(inDir,f)
-
+        path_in      = os.path.join(inDir,f)
+        path_in_raw  = os.path.join(RAW_DATA_PREFIX,f)
+        path_out_ids = os.path.join(OUT_ID_DATA_PREFIX,f)
         #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
         # read in dataframe 
         df = cudf.read_csv(path_in, names = ['tweets'])
@@ -197,12 +202,17 @@ if vocab_build == 1:
         pinned_mempool.free_all_blocks()
         # read in dataframe 
         df = pd.read_csv(path_in, names = ['tweets'])
+
+        #store final ids
+        df2 = pd.read_csv(path_in_raw,names = ["tweet_id"])
+        df["tweet_id"] = df2["tweet_id"]
+
         mask = df['tweets'].str.len() > 10 
         df   = df.loc[mask]
         df   = cudf.from_pandas(df)
         # basic preprocessing
         df   = basic_clean(df)
-
+        df.write_csv(path_out_ids)
         X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
         print(X_batch.shape[0])
 
@@ -296,6 +306,7 @@ if stgd == 1:
 
 if stgd == 0:
     tlda = pickle.load(open(TLDA_FILEPATH,'rb'))
+    tlda.unwhitened_factors_= tlda._unwhiten_factors()
     # M1       = pickle.load(open(M1_FILEPATH,'rb'))
     # print("vocab: M1 shape: ", M1.shape)
 
@@ -305,6 +316,7 @@ if stgd == 0:
 
 if transform_data == 1:
     print("Unwhiten Factors")
+    tot_df =  pd.DataFrame()
     tlda.unwhitened_factors_= tlda._unwhiten_factors()
     t1  = time.time()
     dtm = None
@@ -355,6 +367,23 @@ if transform_data == 1:
 
         t4 = time.time()
         print("New fit time" + str(t4-t3))
+
+        curr_document_topic = tl.to_numpy(dtm)
+
+        del X_batch
+        gc.collect()
+        df1 = pd.read_csv(os.path.join(OUT_ID_DATA_PREFIX, f), names=['tweet_id'])
+        df = pd.read_csv(os.path.join(RAW_DATA_PREFIX,f), names = ['timestamp', 'tweet_id', 'tweets'])
+        df = pd.merge(df, df1, on='tweet_id')
+        df_topics = pd.DataFrame(curr_document_topic, columns = ["Topic " + str(i) for i in range(num_tops)])
+        df.join(df_topics)
+
+        tot_df.append(df, ignore_index = True)
+
+        del curr_document_topic
+        gc.collect()
+        tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH)
+
     t2 = time.time()
  
     print("Fit time: " + str(t2-t1))  
@@ -366,6 +395,45 @@ if transform_data == 1:
 epsilon = 1e-12
 if vocab_build == 0:
     M1       = pickle.load(open(TLDA_FILEPATH, 'rb')).mean
+
+
+
+
+if recover_top_words == 1:
+    n_top_words = 20
+
+    i=1
+    for f in dl:             
+            print(f)
+            X_batch = cupyx.scipy.sparse.csr_matrix( pickle.load(
+                    open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','rb')))
+            if i == 1 :
+                X= X_batch
+            else: 
+                X       = cupyx.scipy.sparse.vstack([X,X_batch])
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+
+            i +=1
+    n = X.shape[0]
+    for k in range(0,num_tops): 
+        if k ==0:
+            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+            top_words_LDA = countvec.vocabulary_[t_n_indices]
+            top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
+            
+        if k >=1:
+            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+            top_words_LDA = countvec.vocabulary_[t_n_indices]
+            top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
+
+
+top_words_df.to_csv(TOP_WORDS_FILEPATH)
+
+
+
 
 if coherence == 1:
     n_top_words = 20
