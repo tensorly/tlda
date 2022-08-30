@@ -204,7 +204,8 @@ if vocab_build == 1:
         df = pd.read_csv(path_in, names = ['tweets'])
 
         #store final ids
-        df2 = pd.read_csv(path_in_raw,names = ["tweet_id"])
+        df2 = pd.read_csv(path_in_raw,names = ["tweet_id"],low_memory=False)
+        print(df2.head())
         df["tweet_id"] = df2["tweet_id"]
 
         mask = df['tweets'].str.len() > 10 
