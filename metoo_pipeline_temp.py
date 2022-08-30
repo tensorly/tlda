@@ -126,6 +126,7 @@ ortho_loss_param = 40
 split_files    = 0
 vocab_build    = 1
 save_files     = 0
+store_ids      = 1 -save_files
 stgd           = 0
 transform_data    = 1
 recover_top_words = 1
@@ -202,12 +203,12 @@ if vocab_build == 1:
         pinned_mempool.free_all_blocks()
         # read in dataframe 
         df = pd.read_csv(path_in, names = ['tweets'])
-
-        #store final ids
-        df2 = pd.read_csv(path_in_raw,header=0)
-        print(df2.head())
-        df["tweet_id"] = df2["tweet_id"]
-        del df2
+        if store_ids == 1:
+            #store final ids
+            df2 = pd.read_csv(path_in_raw,header=0)
+            print(df2.head())
+            df["tweet_id"] = df2["tweet_id"]
+            del df2
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         mask = df['tweets'].str.len() > 10 
@@ -216,7 +217,8 @@ if vocab_build == 1:
         # basic preprocessing
         df   = basic_clean(df)
         df.to_csv(path_out_ids)
-        df.drop(columns=["tweet_id"])
+        if store_ids==1:
+            df.drop(columns=["tweet_id"])
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         gc.collect()
@@ -224,6 +226,7 @@ if vocab_build == 1:
 
         if save_files == 1:
             X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) 
+            print(X_batch.shape[0])
             pickle.dump(
                 (X_batch), 
                 open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','wb')
