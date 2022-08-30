@@ -159,6 +159,7 @@ class ThirdOrderCumulant():
         phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
         max_gamma_change = 1.0
         iter = 0
+        print("Begin Document Topic Prediction")
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
             gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.unwhitened_factors_))) + weights) # estimate for the variational mixing param
@@ -168,6 +169,7 @@ class ThirdOrderCumulant():
             mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
             max_gamma_change       = tl.max(mean_gamma_change_pdoc)
             iter += 1
+            print("End Document Topic Prediction Iteration " + str(iter))
 
         return gammad
 
