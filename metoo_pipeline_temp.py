@@ -208,12 +208,17 @@ if vocab_build == 1:
         print(df2.head())
         df["tweet_id"] = df2["tweet_id"]
         del df2
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()
         mask = df['tweets'].str.len() > 10 
         df   = df.loc[mask]
         df   = cudf.from_pandas(df)
         # basic preprocessing
         df   = basic_clean(df)
         df.to_csv(path_out_ids)
+        df["tweet_id"] = None
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()
         X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
         print(X_batch.shape[0])
 
