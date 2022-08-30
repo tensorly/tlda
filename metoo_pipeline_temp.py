@@ -204,10 +204,10 @@ if vocab_build == 1:
         df = pd.read_csv(path_in, names = ['tweets'])
 
         #store final ids
-        df2 = pd.read_csv(path_in_raw,header=0,low_memory=False)
+        df2 = pd.read_csv(path_in_raw,header=0)
         print(df2.head())
         df["tweet_id"] = df2["tweet_id"]
-
+        del df2
         mask = df['tweets'].str.len() > 10 
         df   = df.loc[mask]
         df   = cudf.from_pandas(df)
