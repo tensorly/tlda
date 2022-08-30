@@ -222,7 +222,6 @@ if vocab_build == 1:
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         gc.collect()
-        print(X_batch.shape[0])
 
         if save_files == 1:
             X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) 
