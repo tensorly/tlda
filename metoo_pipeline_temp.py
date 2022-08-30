@@ -124,7 +124,7 @@ ortho_loss_param = 40
 
 # Program controls
 split_files    = 0
-vocab_build    = 1
+vocab_build    = 0
 save_files     = 0
 store_ids      = 1 -save_files
 stgd           = 0
