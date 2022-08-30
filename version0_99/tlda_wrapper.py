@@ -178,7 +178,8 @@ class TLDA():
             set of documetns to predict topic distribution
         predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. 
         """
-        self.third_order.unwhitened_factors_ = self.unwhitened_factors_
+        self.third_order.unwhitened_factors_ = self.unwhitened_factors()
+        print(self.third_order.unwhitened_factors_)
         if predict:
             predicted_topics = self.third_order.predict(X, self.weights_)
             return predicted_topics
