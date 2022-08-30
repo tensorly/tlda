@@ -220,10 +220,10 @@ if vocab_build == 1:
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         gc.collect()
-        X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
         print(X_batch.shape[0])
 
         if save_files == 1:
+            X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) 
             pickle.dump(
                 (X_batch), 
                 open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','wb')
