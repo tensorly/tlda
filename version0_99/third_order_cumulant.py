@@ -158,14 +158,14 @@ class ThirdOrderCumulant():
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
         exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
         print(exp_elogthetad.shape[1])
-        print(self.factors_.T.shape)
-        phinorm = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20) #ndoc X nvocab
+        print(self.unwhitened_factors_.T.shape)
+        phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
         print(phinorm.shape[1])
         max_gamma_change = 1.0
         iter = 0
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
-            gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.factors_.T))) + weights) # estimate for the variational mixing param
+            gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.unwhitened_factors_.T))) + weights) # estimate for the variational mixing param
             exp_elogthetad = tl.exp(dirichlet_expectation(gammad))
             phinorm        = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20)
 
