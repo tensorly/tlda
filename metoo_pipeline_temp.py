@@ -175,7 +175,7 @@ if vocab_build == 1:
         #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
         # read in dataframe 
         df = cudf.read_csv(path_in, names = ['tweets'])
-
+        print(path_out_ids)
         # basic preprocessing
         df = basic_clean(df)
         countvec.partial_fit(df['tweets'])
@@ -216,8 +216,8 @@ if vocab_build == 1:
         df   = cudf.from_pandas(df)
         # basic preprocessing
         df   = basic_clean(df)
-        df.to_csv(path_out_ids)
         if store_ids==1:
+            df.to_csv(path_out_ids)
             df.drop(columns=["tweet_id"])
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
