@@ -230,6 +230,7 @@ if vocab_build == 1:
                 (X_batch), 
                 open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','wb')
             )
+            del X_batch 
         print("End " + f)
 
     df_voc = cudf.DataFrame({'words':countvec.vocabulary_})
@@ -237,7 +238,7 @@ if vocab_build == 1:
 
     pickle.dump(countvec, open(COUNTVECTOR_FILEPATH, 'wb'))
     # del M1_sum
-    del X_batch 
+
     del df
     del mask
     gc.collect()
