@@ -309,7 +309,7 @@ if stgd == 0:
 
 if transform_data == 1:
     print("Unwhiten Factors")
-    tlda._unwhiten_factors()
+    tlda.unwhitened_factors_= tlda._unwhiten_factors()
     t1  = time.time()
     dtm = None
     for f in dl:
