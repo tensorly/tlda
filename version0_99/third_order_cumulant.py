@@ -191,6 +191,9 @@ class ThirdOrderCumulant():
 
         gammad_l = self._predict_topic(X_test, weights)
         gammad_norm  = [tl.exp(dirichlet_expectation(g)) for g in gammad_l]
-        gammad_norm2 = gammad_norm/tl.reshape(tl.backend.sum(gammad_norm,axis=1),(-1,1))
+        print(gammad_norm)
+        reshape_obj = tl.backend.sum(gammad_norm,axis=1),(-1,1)
+        denom = tl.reshape(reshape_obj)
+        gammad_norm2 = gammad_norm/denom
 
         return gammad_norm2
