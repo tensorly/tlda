@@ -171,11 +171,9 @@ if vocab_build == 1:
         print("Beginning vocabulary build: " + f)
         path_in      = os.path.join(inDir,f)
         path_in_raw  = os.path.join(RAW_DATA_PREFIX,f)
-        path_out_ids = os.path.join(OUT_ID_DATA_PREFIX,f)
         #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
         # read in dataframe 
         df = cudf.read_csv(path_in, names = ['tweets'])
-        print(path_out_ids)
         # basic preprocessing
         df = basic_clean(df)
         countvec.partial_fit(df['tweets'])
@@ -197,6 +195,9 @@ if vocab_build == 1:
     for f in dl:
         print("Beginning transform/mean: " + f)
         path_in  = os.path.join(inDir,f)
+        path_out_ids = os.path.join(OUT_ID_DATA_PREFIX,f)
+        path_in_raw  = os.path.join(RAW_DATA_PREFIX,f)
+
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         pinned_mempool = cp.get_default_pinned_memory_pool()
