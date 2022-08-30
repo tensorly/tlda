@@ -141,16 +141,12 @@ print("\n\nSTART...")
 # Get a list of files in the directory
 #dl = os.listdir(inDir)
 
-# FIRST FILE HAS 1M Tweets
-# first 11 files have 2M tweets
-# first 21 files have 5M tweets, 41 split
-#dl = sorted(fop.get_files_in_dir(inDir))[8:8+MONTHS]
-dl = sorted(fop.get_files_in_dir(inDir))# [:21]
+dl = sorted(fop.get_files_in_dir(inDir))
 
-# Split datafiles into smaller files (makes memory mangement easy)
-print("Splitting files")
+
 
 if split_files == 1:
+    print("Splitting files")
     inDir = fop.split_files(
         inDir, 
         os.path.join(
@@ -330,7 +326,7 @@ if transform_data == 1:
         mempool.free_all_blocks()            
         pinned_mempool = cp.get_default_pinned_memory_pool()
         pinned_mempool.free_all_blocks()
-        batch_size_grad = 10
+        batch_size_grad = 700
         t3 = time.time()
         for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
             k = j + batch_size_grad
