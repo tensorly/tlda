@@ -219,6 +219,7 @@ if vocab_build == 1:
         df.drop(columns=["tweet_id"])
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
+        gc()
         X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
         print(X_batch.shape[0])
 
