@@ -213,7 +213,7 @@ if vocab_build == 1:
         df   = cudf.from_pandas(df)
         # basic preprocessing
         df   = basic_clean(df)
-        df.write_csv(path_out_ids)
+        df.to_csv(path_out_ids)
         X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
         print(X_batch.shape[0])
 
