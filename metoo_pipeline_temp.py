@@ -124,8 +124,8 @@ split_files    = 0
 vocab_build    = 0
 save_files     = 0
 stgd           = 0
-transform_data = 1
-coherence   = 0
+transform_data = 0
+coherence   = 1
 
 # Other globals
 num_data_rows = 0
