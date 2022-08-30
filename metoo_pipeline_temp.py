@@ -216,7 +216,7 @@ if vocab_build == 1:
         # basic preprocessing
         df   = basic_clean(df)
         df.to_csv(path_out_ids)
-        df["tweet_id"] = None
+        df.drop(columns=["tweet_id"])
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         X_batch = tl.tensor(countvec.transform(df['tweets']).toarray()) #oarray())
