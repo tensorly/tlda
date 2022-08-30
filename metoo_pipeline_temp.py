@@ -42,6 +42,7 @@ TLDA_FILEPATH       = '/raid/debanks/MeToo/data/tlda_metoo_comparison.obj' # sto
 VOCAB_FILEPATH                    = '/raid/debanks/MeToo/data/vocab.csv' # save the vocab
 TOPIC_FILEPATH_PREFIX   = '/raid/debanks/MeToo/data/predicted_topics/'
 DOCUMENT_TOPIC_FILEPATH = '/raid/debanks/MeToo/data/dtm.csv'
+DOCUMENT_TOPIC_FILEPATH_TOT = '/raid/debanks/MeToo/data/dtm_df.csv'
 RAW_DATA_PREFIX = '/raid/debanks/MeToo/data/MeTooMonth/'
 OUT_ID_DATA_PREFIX = '/raid/debanks/MeToo/data/ids/' 
 TOP_WORDS_FILEPATH ='/raid/debanks/MeToo/data/top_words.csv'
@@ -391,10 +392,10 @@ if transform_data == 1:
         df.join(df_topics)
 
         tot_df.append(df, ignore_index = True)
-
+        print(tot_df.head())
         del curr_document_topic
         gc.collect()
-        tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH)
+        tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH_TOT)
 
     t2 = time.time()
  
@@ -442,7 +443,7 @@ if recover_top_words == 1:
             top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
 
 
-top_words_df.to_csv(TOP_WORDS_FILEPATH)
+    top_words_df.to_csv(TOP_WORDS_FILEPATH)
 
 
 
