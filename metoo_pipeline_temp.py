@@ -394,7 +394,7 @@ if coherence == 1:
     score       = cp.log(((numerator.toarray()/n)+epsilon)/denominator)
     topic_coh   = []
     for k in range(0,num_tops):
-        t_n_indices   = tlda.factors_[:,k].argsort()[:-n_top_words - 1:-1]
+        t_n_indices   = tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
         score_tmp     = score[cp.ix_(t_n_indices,t_n_indices)]
         topic_coh.append(score_tmp.mean())
  
