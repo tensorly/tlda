@@ -156,9 +156,7 @@ class ThirdOrderCumulant():
 
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
         exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
-        print(self.unwhitened_factors_.T.shape)
         phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
-        print(phinorm.shape[1])
         max_gamma_change = 1.0
         iter = 0
         while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
@@ -192,7 +190,7 @@ class ThirdOrderCumulant():
         '''
 
         gammad_l = self._predict_topic(X_test, weights)
-        gammad_norm  = tl.exp([dirichlet_expectation(g) for g in gammad_l])
+        gammad_norm  = [tl.exp(dirichlet_expectation(g)) for g in gammad_l]
         gammad_norm2 = gammad_norm/tl.reshape(tl.sum(gammad_norm,axis=1),(-1,1))
 
         return gammad_norm2

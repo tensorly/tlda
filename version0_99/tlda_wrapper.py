@@ -157,7 +157,7 @@ class TLDA():
         return factors_unwhitened
 
     @property
-    def unwhitened_factors(self):
+    def unwhitened_factors(self): # This doesnt work
         """Unwhitened learned factors of shape (n_topic, vocabulary_size)
 
         On the first call, this will compute and store the unwhitened factors.
@@ -178,7 +178,7 @@ class TLDA():
             set of documetns to predict topic distribution
         predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. 
         """
-        print(self.unwhitened_factors_)
+
         self.third_order.unwhitened_factors_ = self.unwhitened_factors_
         if predict:
             predicted_topics = self.third_order.predict(X, self.weights_)
