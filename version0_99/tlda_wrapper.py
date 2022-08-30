@@ -163,7 +163,7 @@ class TLDA():
         On the first call, this will compute and store the unwhitened factors.
         Subsequent calls will simply return the stored value. 
         """
-        if self.self.unwhitened_factors_ is None:
+        if self.unwhitened_factors_ is None:
             self.unwhitened_factors_ = self._unwhiten_factors()
         else:
             return self.unwhitened_factors_
