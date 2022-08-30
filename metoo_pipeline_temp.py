@@ -342,7 +342,7 @@ if transform_data == 1:
             y = tl.tensor(X_batch[j:k])
             
             if dtm is not None:
-                tl.concatenate((dtm,tlda.transform(y)),axis=0)
+                dtm = tl.concatenate((dtm,tlda.transform(y)),axis=0)
             else:
                 dtm = tlda.transform(y)
 
