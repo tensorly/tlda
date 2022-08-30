@@ -206,7 +206,7 @@ if vocab_build == 1:
         df = pd.read_csv(path_in, names = ['tweets'])
         if store_ids == 1:
             #store final ids
-            df2 = pd.read_csv(path_in_raw,usecols=["tweet_id"])
+            df2 = pd.read_csv(path_in_raw,usecols=["tweet_id"],lineterminator='\n')
             print(df2.head())
             df["tweet_id"] = df2["tweet_id"]
             del df2
