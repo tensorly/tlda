@@ -153,11 +153,9 @@ class ThirdOrderCumulant():
         # factors = nvocab x ntopics
         n_topics = self.n_topic
         n_docs = X_batch.shape[0]
-        print(X_batch.shape[1])
 
         gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
         exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
-        print(exp_elogthetad.shape[1])
         print(self.unwhitened_factors_.T.shape)
         phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
         print(phinorm.shape[1])
