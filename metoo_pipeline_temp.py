@@ -405,12 +405,12 @@ if recover_top_words == 1:
 
     for k in range(0,num_tops): 
         if k ==0:
-            t_n_indices   =  tlda.unwhitened_factors_[k,:].argsort()[:-n_top_words - 1:-1]
+            t_n_indices   =  tlda.unwhitened_factors_.T[:,k].argsort()[:-n_top_words - 1:-1]
             top_words_LDA = countvec.vocabulary_[t_n_indices]
             top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
             
         if k >=1:
-            t_n_indices   =  tlda.unwhitened_factors_[k,:].argsort()[:-n_top_words - 1:-1]
+            t_n_indices   =  tlda.unwhitened_factors_.T[:,k].argsort()[:-n_top_words - 1:-1]
             top_words_LDA = countvec.vocabulary_[t_n_indices]
             top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
 
