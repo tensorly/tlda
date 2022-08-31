@@ -128,7 +128,8 @@ split_files    = 0
 vocab_build    = 0
 save_files     = 0
 stgd           = 0
-transform_data    = 1
+transform_data    = 0
+create_meta_df    = 1
 recover_top_words = 1
 coherence         = 1
 
@@ -318,7 +319,6 @@ if stgd == 0:
 
 if transform_data == 1:
     print("Unwhiten Factors")
-    tot_df =  cudf.DataFrame()
     tlda.unwhitened_factors_= tlda._unwhiten_factors()
     t1  = time.time()
     dtm = None
@@ -369,29 +369,10 @@ if transform_data == 1:
 
         t4 = time.time()
         print("New fit time" + str(t4-t3))
-
-        curr_document_topic = tl.to_numpy(dtm)
-
         del X_batch
-        gc.collect()
-        df = pd.read_csv(os.path.join(RAW_DATA_PREFIX,f),lineterminator='\n')
-        mask = df['tweets'].str.len() > 10 
-        df   = df.loc[mask]
-        df   = cudf.from_pandas(df)
-        # Replicate basic preprocessing
-        df   = basic_clean(df)
-        #df_topics = cudf.DataFrame(curr_document_topic, columns = ["Topic " + str(i) for i in range(num_tops)])
-        #df.join(df_topics)
-
-        tot_df= cudf.concat([tot_df,df], ignore_index = True)
-        print(tot_df.head())
-        del curr_document_topic
-        del df
-        gc.collect()
-        tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH_TOT)
 
     t2 = time.time()
-    del tot_df 
+
     print("Fit time: " + str(t2-t1))  
 
     pickle.dump(cp.asnumpy(dtm), open(DOCUMENT_TOPIC_FILEPATH, 'wb'))
@@ -402,6 +383,25 @@ epsilon = 1e-12
 if vocab_build == 0:
     M1       = pickle.load(open(TLDA_FILEPATH, 'rb')).mean
 
+
+if create_meta_df==1:
+    print("Create MetaData")
+    tot_df =  cudf.DataFrame()
+    for f in dl:
+        print("Beginning MetaData Creation: " + f)
+
+        gc.collect()
+        df = pd.read_csv(os.path.join(RAW_DATA_PREFIX,f),lineterminator='\n')
+        mask = df['tweets'].str.len() > 10 
+        df   = df.loc[mask]
+        df   = cudf.from_pandas(df)
+        df   = basic_clean(df)
+        tot_df= cudf.concat([tot_df,df], ignore_index = True)
+        print(tot_df.head())
+        del df
+        gc.collect()
+        tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH_TOT)
+    del tot_df 
 
 
 
