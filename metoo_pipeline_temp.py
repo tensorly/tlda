@@ -128,8 +128,8 @@ split_files    = 0
 vocab_build    = 0
 save_files     = 0
 stgd           = 0
-recover_top_words = 1
-transform_data    = 0
+recover_top_words = 0
+transform_data    = 1
 create_meta_df    = 0
 coherence         = 1
 
