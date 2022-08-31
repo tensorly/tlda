@@ -401,22 +401,8 @@ if create_meta_df==1:
 if recover_top_words == 1:
     n_top_words = 20
 
-    i=1
-    for f in dl:             
-            print(f)
-            X_batch = cupyx.scipy.sparse.csr_matrix( pickle.load(
-                    open(X_MAT_FILEPATH_PREFIX + Path(f).stem + '_' + str(num_tops) + '.obj','rb')))
-            if i == 1 :
-                X= X_batch
-            else: 
-                X       = cupyx.scipy.sparse.vstack([X,X_batch])
-                mempool = cp.get_default_memory_pool()
-                mempool.free_all_blocks()            
-                pinned_mempool = cp.get_default_pinned_memory_pool()
-                pinned_mempool.free_all_blocks()
+    print(tlda.unwhitened_factors_.shape)    
 
-            i +=1
-    n = X.shape[0]
     for k in range(0,num_tops): 
         if k ==0:
             t_n_indices   =  tlda.unwhitened_factors_[k,:].argsort()[:-n_top_words - 1:-1]
