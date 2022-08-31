@@ -273,25 +273,20 @@ if stgd == 1:
         pinned_mempool.free_all_blocks()
         
         t3 = time.time()
-        for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
-            k = j + batch_size_grad
 
-            # Check if remainder is undersized
-            if (len(X_batch) - k) < batch_size_grad:
-                k = len(X_batch)
             
-            mempool = cp.get_default_memory_pool()
-            mempool.free_all_blocks()            
-            pinned_mempool = cp.get_default_pinned_memory_pool()
-            pinned_mempool.free_all_blocks()
-            y = tl.tensor(X_batch[j:k])
-            
-            tlda.partial_fit_online(y)
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()            
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+        pinned_mempool.free_all_blocks()
+        y = tl.tensor(X_batch)
+        
+        tlda.partial_fit_online(y)
 
-            mempool = cp.get_default_memory_pool()
-            mempool.free_all_blocks()            
-            pinned_mempool = cp.get_default_pinned_memory_pool()
-            pinned_mempool.free_all_blocks()
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()            
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+        pinned_mempool.free_all_blocks()
 
         t4 = time.time()
         print("New fit time" + str(t4-t3))
