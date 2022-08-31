@@ -160,7 +160,7 @@ class ThirdOrderCumulant():
         max_gamma_change = 1.0
         iter = 0
         print("Begin Document Topic Prediction")
-        while (max_gamma_change > 1e-4 and iter < self.n_iter_test):
+        while (max_gamma_change > 1e-2 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
             x_phi_norm     =  X_batch / phinorm
             x_phi_norm_factors = tl.matmul(x_phi_norm,self.unwhitened_factors_)
@@ -171,7 +171,7 @@ class ThirdOrderCumulant():
             mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
             max_gamma_change       = tl.max(mean_gamma_change_pdoc)
             iter += 1
-            print("End Document Topic Prediction Iteration " + str(iter))
+            print("End Document Topic Prediction Iteration " + str(iter) +" out of "+str(self.n_iter_test))
             print("Current Maximal Change:" + str(max_gamma_change))
         return gammad
 
