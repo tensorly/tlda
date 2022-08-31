@@ -384,18 +384,19 @@ if transform_data == 1:
 
         del X_batch
         gc.collect()
-        df1 = pd.read_csv(os.path.join(OUT_ID_DATA_PREFIX, f))
-        print(df1.head())
+        df1 = pd.read_csv(os.path.join(OUT_ID_DATA_PREFIX, f),names=["mask","tweets","tweet_id"])
+        mask = df1["mask"]
+        del df1
         df = pd.read_csv(os.path.join(RAW_DATA_PREFIX,f),lineterminator='\n')
         print(df.head())
         print("Merge Data")
-        df = pd.merge(df, df1, on='tweet_id')
+        df = df.iloc[mask]
         print(df.head())
         df_topics = pd.DataFrame(curr_document_topic, columns = ["Topic " + str(i) for i in range(num_tops)])
         print(df_topics.head())
         df.join(df_topics)
 
-        tot_df.concat([tot_df,df], ignore_index = True)
+        tot_df= pd.concat([tot_df,df], ignore_index = True)
         print(tot_df.head())
         del curr_document_topic
         gc.collect()
