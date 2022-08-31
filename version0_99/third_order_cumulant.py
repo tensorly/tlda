@@ -85,7 +85,8 @@ class ThirdOrderCumulant():
             init_values, _ = tl.qr(init_values, mode='reduced')
             ortho_loss = loss_rec(init_values, self.theta)
             i += 1
-            self.theta -= 0.1		
+            self.theta -= 0.1	
+            print(init_values)	
    
         self.factors_ = init_values
     
