@@ -403,6 +403,7 @@ if recover_top_words == 1:
 
     print(tlda.unwhitened_factors_.shape)    
     print(tlda.unwhitened_factors_.T[1,:])
+    print(tlda.unwhitened_factors_.T[2,:])
 
     for k in range(0,num_tops): 
         if k ==0:
