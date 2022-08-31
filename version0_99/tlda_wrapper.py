@@ -63,7 +63,9 @@ class TLDA():
         self.n_documents += X_batch.shape[0]
 
     def _partial_fit_second_order(self, X_batch):
-        self.second_order.partial_fit(X_batch - self.mean)
+        for j in range(0, len(X_batch), self.second_order.batch_size):
+            y  = X_batch[j:j+self.second_order_cumulant_batch]
+            self.second_order.partial_fit(y) 
     
     def _partial_fit_third_order(self, X_batch):
         for j in range(0, len(X_batch), self.third_order_cumulant_batch):
