@@ -386,7 +386,6 @@ if vocab_build == 0:
 
 if create_meta_df==1:
     print("Create MetaData")
-    tot_df =  cudf.DataFrame()
     for f in dl:
         print("Beginning MetaData Creation: " + f)
 
@@ -396,12 +395,10 @@ if create_meta_df==1:
         df   = df.loc[mask]
         df   = cudf.from_pandas(df)
         df   = basic_clean(df)
-        tot_df= cudf.concat([tot_df,df], ignore_index = True)
-        print(tot_df.head())
-        del df
+
         gc.collect()
-        tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH_TOT)
-    del tot_df 
+        df.to_csv(OUT_ID_DATA_PREFIX+f)
+
 
 
 
