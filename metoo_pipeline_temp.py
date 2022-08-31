@@ -141,11 +141,7 @@ max_data_rows = 1.2e6
 
 print("\n\nSTART...")
 
-# tlda = pickle.load(open(TLDA_FILEPATH, "rb"))
-# pickle.dump(tlda.factors_, open("../data/Meena_testing/tlda_factors_metoo.obj", "wb"))
 
-# Get a list of files in the directory
-#dl = os.listdir(inDir)
 
 dl = sorted(fop.get_files_in_dir(inDir))
 
