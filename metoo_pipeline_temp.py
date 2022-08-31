@@ -129,7 +129,7 @@ vocab_build    = 0
 save_files     = 0
 stgd           = 0
 transform_data    = 0
-create_meta_df    = 1
+create_meta_df    = 0
 recover_top_words = 1
 coherence         = 1
 
@@ -419,12 +419,12 @@ if recover_top_words == 1:
     n = X.shape[0]
     for k in range(0,num_tops): 
         if k ==0:
-            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+            t_n_indices   =  tlda.unwhitened_factors_[k,:].argsort()[:-n_top_words - 1:-1]
             top_words_LDA = countvec.vocabulary_[t_n_indices]
             top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
             
         if k >=1:
-            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+            t_n_indices   =  tlda.unwhitened_factors_[k,:].argsort()[:-n_top_words - 1:-1]
             top_words_LDA = countvec.vocabulary_[t_n_indices]
             top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
 
