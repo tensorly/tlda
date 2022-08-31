@@ -340,7 +340,7 @@ if transform_data == 1:
         mempool.free_all_blocks()            
         pinned_mempool = cp.get_default_pinned_memory_pool()
         pinned_mempool.free_all_blocks()
-        batch_size_grad = 500000
+        batch_size_grad = 100000
         t3 = time.time()
         for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
             k = j + batch_size_grad
