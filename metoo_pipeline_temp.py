@@ -115,10 +115,10 @@ alpha_0 = 0.01
 batch_size_pca  = 50000  # this will handle 2000 words + 100 topics ad infinite number of documents 
 #batch_size_pca  = 5000 # for whitening
 batch_size_grad = 750 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
-n_iter_train    = 1000
+n_iter_train    = 100
 n_iter_test     = 10
 # 0.0005
-learning_rate   = 0.004 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
+learning_rate   = 0.0004 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
 theta_param = 5.005
 smoothing   = 1e-7
 ortho_loss_param = 1000
