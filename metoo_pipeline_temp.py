@@ -402,6 +402,7 @@ if recover_top_words == 1:
     n_top_words = 20
 
     print(tlda.unwhitened_factors_.shape)    
+    print(tlda.unwhitened_factors_.T[:,k])
 
     for k in range(0,num_tops): 
         if k ==0:
@@ -420,7 +421,7 @@ if recover_top_words == 1:
 
 
 
-if coherence == 1:
+if coherence == 0:
     n_top_words = 20
 
     i=1
