@@ -121,7 +121,7 @@ n_iter_test     = 10
 learning_rate   = 0.004 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
 theta_param = 5.005
 smoothing   = 1e-7
-ortho_loss_param = 10
+ortho_loss_param = 1000
 
 # Program controls
 split_files    = 0
