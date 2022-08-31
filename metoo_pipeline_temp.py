@@ -313,6 +313,28 @@ if stgd == 0:
     # num_data_rows = 11192442# 7976703 # delete after testing
 
 
+if recover_top_words == 1:
+    n_top_words = 20
+
+    print(tlda.unwhitened_factors_.shape)    
+
+
+    for k in range(0,num_tops): 
+        if k ==0:
+            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+            top_words_LDA = countvec.vocabulary_[t_n_indices]
+            top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
+            
+        if k >=1:
+            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+            top_words_LDA = countvec.vocabulary_[t_n_indices]
+            top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
+
+
+    top_words_df.to_csv(TOP_WORDS_FILEPATH)
+
+
+
 if transform_data == 1:
     print("Unwhiten Factors")
     tlda.unwhitened_factors_= tlda._unwhiten_factors()
@@ -397,26 +419,6 @@ if create_meta_df==1:
 
 
 
-
-if recover_top_words == 1:
-    n_top_words = 20
-
-    print(tlda.unwhitened_factors_.shape)    
-
-
-    for k in range(0,num_tops): 
-        if k ==0:
-            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
-            top_words_LDA = countvec.vocabulary_[t_n_indices]
-            top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
-            
-        if k >=1:
-            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
-            top_words_LDA = countvec.vocabulary_[t_n_indices]
-            top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
-
-
-    top_words_df.to_csv(TOP_WORDS_FILEPATH)
 
 
 
