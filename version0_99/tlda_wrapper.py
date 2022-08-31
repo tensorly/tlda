@@ -153,6 +153,7 @@ class TLDA():
         self.weights_   = tl.tensor(alpha_norm)
 
         # Normalize the factors
+        
         factors_unwhitened /= factors_unwhitened.sum(axis=0)
         return factors_unwhitened
 
