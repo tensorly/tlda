@@ -127,7 +127,6 @@ ortho_loss_param = 40
 split_files    = 0
 vocab_build    = 0
 save_files     = 0
-store_ids      = 1 -save_files
 stgd           = 0
 transform_data    = 1
 recover_top_words = 1
@@ -205,12 +204,6 @@ if vocab_build == 1:
         pinned_mempool.free_all_blocks()
         # read in dataframe 
         df = pd.read_csv(path_in, names = ['tweets'])
-        if store_ids == 1:
-            #store final ids
-            df2 = pd.read_csv(path_in_raw,usecols=["tweet_id"],lineterminator='\n')
-            print(df2.head())
-            df["tweet_id"] = df2["tweet_id"]
-            del df2
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         mask = df['tweets'].str.len() > 10 
@@ -218,9 +211,6 @@ if vocab_build == 1:
         df   = cudf.from_pandas(df)
         # basic preprocessing
         df   = basic_clean(df)
-        if store_ids==1:
-            df.to_csv(path_out_ids)
-            df.drop(columns=["tweet_id"])
         mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         gc.collect()
@@ -388,23 +378,20 @@ if transform_data == 1:
         mask = df['tweets'].str.len() > 10 
         df   = df.loc[mask]
         df   = cudf.from_pandas(df)
-        # basic preprocessing
+        # Replicate basic preprocessing
         df   = basic_clean(df)
-        print(df.head())
-        df_topics = cudf.DataFrame(curr_document_topic, columns = ["Topic " + str(i) for i in range(num_tops)])
-        print(df_topics.head())
-        df.join(df_topics)
+        #df_topics = cudf.DataFrame(curr_document_topic, columns = ["Topic " + str(i) for i in range(num_tops)])
+        #df.join(df_topics)
 
         tot_df= cudf.concat([tot_df,df], ignore_index = True)
         print(tot_df.head())
         del curr_document_topic
+        del df
         gc.collect()
         tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH_TOT)
 
     t2 = time.time()
     del tot_df 
-    del df
-    del df_topics
     print("Fit time: " + str(t2-t1))  
 
     pickle.dump(cp.asnumpy(dtm), open(DOCUMENT_TOPIC_FILEPATH, 'wb'))
