@@ -395,14 +395,17 @@ if transform_data == 1:
         print(df_topics.head())
         df.join(df_topics)
 
-        tot_df.append(df, ignore_index = True)
+        tot_df.concat([tot_df,df], ignore_index = True)
         print(tot_df.head())
         del curr_document_topic
         gc.collect()
         tot_df.to_csv(DOCUMENT_TOPIC_FILEPATH_TOT)
 
     t2 = time.time()
- 
+    del tot_df 
+    del df1 
+    del df
+    del df_topics
     print("Fit time: " + str(t2-t1))  
 
     pickle.dump(cp.asnumpy(dtm), open(DOCUMENT_TOPIC_FILEPATH, 'wb'))
