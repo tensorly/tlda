@@ -127,7 +127,7 @@ ortho_loss_param = 1000
 split_files    = 0
 vocab_build    = 0
 save_files     = 0
-stgd           = 1
+stgd           = 0
 recover_top_words = 1
 transform_data    = 0
 create_meta_df    = 0
@@ -316,7 +316,7 @@ if stgd == 0:
 if recover_top_words == 1:
     n_top_words = 20
 
-    print(tlda.unwhitened_factors_.shape)    
+    print(tlda.unwhitened_factors_)    
 
 
     for k in range(0,num_tops): 
