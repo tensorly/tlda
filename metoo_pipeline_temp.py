@@ -118,7 +118,7 @@ batch_size_grad = 750 # 1% of data size - see what coherence looks like - can al
 n_iter_train    = 1000
 n_iter_test     = 10
 # 0.0005
-learning_rate   = 0.005 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
+learning_rate   = 0.004 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
 theta_param = 5.005
 smoothing   = 1e-7
 ortho_loss_param = 10
