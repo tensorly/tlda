@@ -121,14 +121,14 @@ n_iter_test     = 10
 learning_rate   = 0.005 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
 theta_param = 5.005
 smoothing   = 1e-5
-ortho_loss_param = 100
+ortho_loss_param = 10
 
 # Program controls
 split_files    = 0
 vocab_build    = 0
 save_files     = 0
-stgd           = 0
-transform_data    = 0
+stgd           = 1
+transform_data    = 1
 create_meta_df    = 0
 recover_top_words = 1
 coherence         = 1
@@ -402,17 +402,16 @@ if recover_top_words == 1:
     n_top_words = 20
 
     print(tlda.unwhitened_factors_.shape)    
-    print(tlda.unwhitened_factors_.T[1,:])
-    print(tlda.unwhitened_factors_.T[2,:])
+
 
     for k in range(0,num_tops): 
         if k ==0:
-            t_n_indices   =  tlda.unwhitened_factors_.T[:,k].argsort()[:-n_top_words - 1:-1]
+            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
             top_words_LDA = countvec.vocabulary_[t_n_indices]
             top_words_df  = cudf.DataFrame({'words_'+str(k):top_words_LDA}).reset_index(drop=True)
             
         if k >=1:
-            t_n_indices   =  tlda.unwhitened_factors_.T[:,k].argsort()[:-n_top_words - 1:-1]
+            t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
             top_words_LDA = countvec.vocabulary_[t_n_indices]
             top_words_df['words_'+str(k)] = top_words_LDA.reset_index(drop=True)
 
