@@ -65,7 +65,8 @@ class TLDA():
     def _partial_fit_second_order(self, X_batch):
         for j in range(0, len(X_batch), self.second_order.batch_size):
             y  = X_batch[j:j+self.second_order.batch_size]
-            self.second_order.partial_fit(y) 
+            self.second_order.partial_fit(y)
+            del y 
     
     def _partial_fit_third_order(self, X_batch):
         for j in range(0, len(X_batch), self.third_order_cumulant_batch):
