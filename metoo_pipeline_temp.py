@@ -386,11 +386,12 @@ if transform_data == 1:
         gc.collect()
         df1 = pd.read_csv(os.path.join(OUT_ID_DATA_PREFIX, f),names=["mask","tweets","tweet_id"])
         mask = df1["mask"]
+        print(mask)
         del df1
         df = pd.read_csv(os.path.join(RAW_DATA_PREFIX,f),lineterminator='\n')
         print(df.head())
         print("Merge Data")
-        df = df.iloc[mask]
+        df = df.iloc[mask,:]
         print(df.head())
         df_topics = pd.DataFrame(curr_document_topic, columns = ["Topic " + str(i) for i in range(num_tops)])
         print(df_topics.head())
@@ -404,7 +405,6 @@ if transform_data == 1:
 
     t2 = time.time()
     del tot_df 
-    del df1 
     del df
     del df_topics
     print("Fit time: " + str(t2-t1))  
