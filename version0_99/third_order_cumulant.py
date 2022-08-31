@@ -160,7 +160,7 @@ class ThirdOrderCumulant():
         max_gamma_change = 1.0
         iter = 0
         print("Begin Document Topic Prediction")
-        while (max_gamma_change > 1e-3 and iter < self.n_iter_test):
+        while (max_gamma_change > 1e-5 and iter < self.n_iter_test):
             lastgamma      = tl.copy(gammad)
             gammad         = ((exp_elogthetad * (tl.matmul( X_batch / phinorm,self.unwhitened_factors_))) + weights) # estimate for the variational mixing param
             exp_elogthetad = tl.exp(dirichlet_expectation(gammad))
