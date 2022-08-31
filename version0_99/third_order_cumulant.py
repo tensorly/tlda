@@ -166,7 +166,7 @@ class ThirdOrderCumulant():
             x_phi_norm_factors = tl.matmul(x_phi_norm,self.unwhitened_factors_)
             gammad         = ((exp_elogthetad * (x_phi_norm_factors)) + weights) # estimate for the variational mixing param
             exp_elogthetad = tl.exp(dirichlet_expectation(gammad))
-            phinorm        = (tl.matmul(exp_elogthetad,self.factors_.T) + 1e-20)
+            phinorm        = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20)
 
             mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
             max_gamma_change       = tl.max(mean_gamma_change_pdoc)
@@ -194,6 +194,7 @@ class ThirdOrderCumulant():
         '''
 
         gammad_l = self._predict_topic(X_test, weights)
+        print(gammad_l.shape)
         gammad_norm  = tl.exp(dirichlet_expectation(gammad_l))
         reshape_obj  = tl.sum(gammad_norm,axis=1)
         denom = tl.reshape(reshape_obj,(-1,1))
