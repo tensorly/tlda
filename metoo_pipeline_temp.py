@@ -79,16 +79,16 @@ added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","
                "said","talk","congrats","congratulations","are","as","i", "time","abus","year","mani","trump",
                "me", "my", "myself", "we", "our", "ours", "ourselves", "use","look","movement","assault",
                "you", "your", "yours","he","her","him","she","hers","that","harass","whi","feel","say","gt",
-               "be","with","their","they're","is","was","been","not","they","womensmarch","way","thi",
+               "be","with","their","they're","is","was","been","not","they","way","thi",
                "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell",
-               "good","day","work", "latest","today","becaus","peopl","via","see","timesup","old","ani",
+               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani",
                "call", "wouldnt","wow", "learned","hi"   , "things" ,"thing","can't","can","right","got","show",
                "cant","will","go","going","let","would","could","him","his","think","thi","ha","onli","back",
                "lets","let's","say","says","know","talk","talked","talks","dont","think","watch","right",
                "said","something","this","was","has","had","abc","rt","ha","haha","hat","even","happen",
                "something","wont","people","make","want","went","goes","people","had","also","ye","still","must",
                "person","like","come","from","yet","able","wa","yah","yeh","yeah","onli","ask","give","read",
-               "need","us", "men", "women", "get", "woman", "man", "amp","amp&","yr","yrs", "heforsh", "daca",
+               "need","us", "men", "women", "get", "woman", "man", "amp","amp&","yr","yrs",
                "shirt", "resist", "vs"]
 
 
