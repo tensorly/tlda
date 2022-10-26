@@ -5,11 +5,13 @@ import scipy
 import os
 from os.path import exists, isfile, join
 from pathlib import Path
+import sys
 import shutil
 import gc
 import math
 import gensim
 from gensim.models.coherencemodel import CoherenceModel
+from gensim.corpora import Dictionary
 import json
 
 
@@ -18,6 +20,7 @@ import nltk
 from nltk import word_tokenize
 nltk.download('stopwords')
 from nltk.corpus import stopwords
+from nltk.util import everygrams
 
 # Import TensorLy
 import tensorly as tl
@@ -41,15 +44,21 @@ import version0_99.file_operations as fop
 # Constants
 
 # Root Filepath -- can modify
-ROOT_DIR = "/raid/debanks/MeToo/data/"
+ROOT_DIR = "/Users/skangaslahti/tlda/data"
+# "/raid/debanks/MeToo/data/"
 
 # Data Relative Paths -- can modify
-RAW_DATA_PREFIX = 'MeTooMonth/'
+# My NVIDIA machine does not have raw data
+# RAW_DATA_PREFIX = 'MeTooMonth/'
 INDIR = "MeTooMonthCleaned/"
 
 # Output Relative paths -- do not change
 X_MAT_FILEPATH_PREFIX = "x_mat/"
+X_FILEPATH = "X_full.obj"
+X_DF_FILEPATH = "X_df.obj"
+X_LST_FILEPATH = "X_lst.obj"
 CORPUS_FILEPATH_PREFIX = "corpus/"
+GENSIM_CORPUS_FILEPATH = "corpus.obj"
 COUNTVECTOR_FILEPATH = "countvec.obj"
 TLDA_FILEPATH = "tlda.obj"
 VOCAB_FILEPATH = "vocab.csv"
@@ -88,7 +97,7 @@ def tune_filesplit_size_on_IPCA_batch_size(IPCA_batchsize):
 
 # declare the stop words 
 stop_words = (stopwords.words('english'))
-added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","metoo","watch",
+added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","metoo", "#metoo", "watch",
                "said","talk","congrats","congratulations","are","as", "time","year","mani","trump",
                 "use","look","that","harass","whi","feel","say","gt",
                "be","with","their","they're","is","was","been","not","they","way","thi",
@@ -100,11 +109,16 @@ added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","
                "said","something","this","was","has","had","abc","rt","ha","haha","hat","even","happen",
                "something","wont","people","make","want","went","goes","people","had","also","ye","still","must",
                "person","like","come","from","yet","able","wa","yah","yeh","yeah","onli","ask","give","read",
-               "need", "get", "amp","amp&","yr","yrs"]
+               "need", "get", "amp","amp&","yr","yrs", "@", "#", "a", "b", "c", "d", "e", "f", "g", "h", "i",
+               "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 
 # set stop words and countvectorizer method
 stop_words= list(np.append(stop_words,added_words))
 CountVectorizer.partial_fit = partial_fit
+
+# define function with no preprocessing
+def custom_preprocessor(doc):
+    return doc
 
 
 def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_rate = 0.0004, theta_param = 5.005, ortho_loss_param = 1000):
@@ -112,6 +126,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     countvec = CountVectorizer( stop_words = stop_words, # works
                                 lowercase = True, # works
                                 ngram_range = (1,2), ## allow for bigrams
+                                preprocessor = custom_preprocessor,
                                 # toggle these two argumets so that you have 2000 words total in the dictionary
                                 #max_df = 10000, # limit this to 10,000 ## 500000 for 8M
                                 max_df = 0.5, #100000, # limit this to 10,000 ## 500000 for 8M
@@ -119,7 +134,12 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     
     # make final directories for outputs
     save_dir = os.path.join(ROOT_DIR, curr_dir)
-    exp_save_dir = os.path.join(save_dir, "num_tops_" + str(num_tops) + "alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "/")
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+        
+    exp_save_dir = os.path.join(save_dir, "num_tops_" + str(num_tops) + "_alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "/")
+    if not os.path.exists(exp_save_dir):
+        os.makedirs(exp_save_dir)
 
     # inDir  = "/raid/debanks/MeToo/data/MeTooMonthCleaned" # MeTooMonthCleaned" # input('Name of input directory? : ')
 
@@ -131,11 +151,14 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     # ortho_loss_param = 1000
 
     # DEFAULT PARAMS
-    batch_size_pca  = 50000  # this will handle 2000 words + 100 topics ad infinite number of documents 
+    batch_size_pca  = 25000  # this will handle 2000 words + 100 topics ad infinite number of documents 
     batch_size_grad = 750 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
     smoothing   = 1e-5
     n_iter_train = 20
     n_iter_test = 10
+    
+    #SET SEED
+    seed = 57
 
     # Program controls
     vocab_build    = first_run
@@ -143,7 +166,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     stgd           = 1
     recover_top_words = 1
     transform_data    = 1
-    create_meta_df    = first_run
+    create_meta_df    = 0
     coherence         = 1
 
     # Other globals
@@ -188,9 +211,23 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             # path_in_raw  = os.path.join(os.path.join(ROOT_DIR, RAW_DATA_PREFIX),f)
             #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
             # read in dataframe 
-            df = cudf.read_csv(path_in, names = ['tweets'])
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
+            # read in dataframe 
+            df = pd.read_csv(path_in, names = ['tweets'])
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()
+            mask = df['tweets'].str.len() > 10 
+            df   = df.loc[mask]
+            df   = cudf.from_pandas(df)
             # basic preprocessing
-            df = basic_clean(df)
+            df   = basic_clean(df)
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()
+            gc.collect()
+            
             countvec.partial_fit(df['tweets'])
             print("End " + f)
 
@@ -204,6 +241,12 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
         vocab = len(countvec.vocabulary_)
         
         print("right after countvec partial fit vocab\n\n\n: ", vocab)
+        x_mat_dir = os.path.join(save_dir, X_MAT_FILEPATH_PREFIX)
+        if not os.path.exists(x_mat_dir):
+            os.makedirs(x_mat_dir)
+        corpus_dir = os.path.join(save_dir, CORPUS_FILEPATH_PREFIX)
+        if not os.path.exists(corpus_dir):
+            os.makedirs(corpus_dir)
         # M1_sum = tl.zeros(vocab)
         len_arr = []
         tot_len = 0
@@ -236,29 +279,29 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
                 print(X_batch.shape[0])
                 pickle.dump(
                     (X_batch), 
-                    open(save_dir + X_MAT_FILEPATH_PREFIX + Path(f).stem + '.obj','wb')
+                    open(x_mat_dir + Path(f).stem + '.obj','wb')
                 )
                 pickle.dump(
                     (corpus), 
-                    open(save_dir + CORPUS_FILEPATH_PREFIX + Path(f).stem + '.obj','wb')
+                    open(corpus_dir + Path(f).stem + '.obj','wb')
                 )
                 del X_batch 
                 del corpus
             print("End " + f)
+            del df
+            del mask
 
         df_voc = cudf.DataFrame({'words':countvec.vocabulary_})
-        df_voc.to_csv(save_dir + VOCAB_FILEPATH)
+        df_voc.to_csv(save_dir + "/" + VOCAB_FILEPATH)
 
         # pickle.dump(countvec, open(save_dir + COUNTVECTOR_FILEPATH, 'wb'))
         # del M1_sum
 
-        del df
-        del mask
         gc.collect()
 
 
     if vocab_build == 0:
-        countvec = pickle.load(open(save_dir + COUNTVECTOR_FILEPATH,'rb'))
+        countvec = pickle.load(open(save_dir + "/" + COUNTVECTOR_FILEPATH,'rb'))
         # M1       = pickle.load(open(M1_FILEPATH,'rb'))
         # print("vocab: M1 shape: ", M1.shape)
         vocab = len(countvec.vocabulary_)
@@ -271,7 +314,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     tlda = TLDA(
         num_tops, alpha_0, n_iter_train, n_iter_test,learning_rate, 
         pca_batch_size = batch_size_pca, third_order_cumulant_batch = batch_size_grad, 
-        gamma_shape = 1.0, smoothing = smoothing, theta=theta_param, ortho_loss_criterion = ortho_loss_param
+        gamma_shape = 1.0, smoothing = smoothing, theta=theta_param, ortho_loss_criterion = ortho_loss_param, random_seed = seed
     )
 
     tot_tlda_time = 0.0
@@ -283,7 +326,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()            
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
-            print("Beginning TLDA: " + f)
+            print("Beginfning TLDA: " + f)
             # cp.ndarray.get(
             X_batch = pickle.load(
                         open(save_dir + X_MAT_FILEPATH_PREFIX + Path(f).stem + '.obj','rb')
@@ -296,6 +339,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()            
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
+            gc.collect()
             
             t3 = time.time()
             for j in range(0, max(1, len(X_batch)-(batch_size_pca-1)), batch_size_pca):
@@ -313,6 +357,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
                 
                 tlda.partial_fit_online(y)
 
+                del y
+                gc.collect()
                 mempool = cp.get_default_memory_pool()
                 mempool.free_all_blocks()            
                 pinned_mempool = cp.get_default_pinned_memory_pool()
@@ -321,6 +367,13 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             t4 = time.time()
             print("New fit time" + str(t4-t3))
             tot_tlda_time += t4-t3
+            
+            del X_batch
+            gc.collect()
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()            
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
         t2 = time.time()
     
         print("Fit time: " + str(t2-t1))
@@ -342,7 +395,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
     if recover_top_words == 1:
         n_top_words = 100
-
+        
+        tlda.unwhitened_factors_ = tlda._unwhiten_factors()
         print(tlda.unwhitened_factors_)    
 
 
@@ -359,7 +413,13 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
 
         top_words_df.to_csv(exp_save_dir + TOP_WORDS_FILEPATH)
+        del top_words_df
 
+    gc.collect()
+    mempool = cp.get_default_memory_pool()
+    mempool.free_all_blocks()            
+    pinned_mempool = cp.get_default_pinned_memory_pool()
+    pinned_mempool.free_all_blocks()
 
 
     if transform_data == 1:
@@ -385,8 +445,14 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()            
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
-            batch_size_grad = 100000
+            batch_size_grad = 50000
             t3 = time.time()
+            
+#             if dtm is not None:
+#                 dtm = np.concatenate((dtm,cp.asnumpy(tlda.transform(X_batch))),axis=0) # tl.concatenate, no as numpy
+#             else:
+#                 dtm = cp.asnumpy(tlda.transform(X_batch)) # take out cp as numpy
+            
             for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
                 k = j + batch_size_grad
 
@@ -401,11 +467,12 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
                 y = tl.tensor(X_batch[j:k])
                 
                 if dtm is not None:
-                    dtm = tl.concatenate((dtm,tlda.transform(y)),axis=0)
+                    dtm = np.concatenate((dtm,cp.asnumpy(tlda.transform(y))),axis=0) # tl.concatenate, no as numpy
                 else:
-                    dtm = tlda.transform(y)
+                    dtm = cp.asnumpy(tlda.transform(y)) # take out cp as numpy
 
                 print(dtm.shape)
+                del y
 
                 mempool = cp.get_default_memory_pool()
                 mempool.free_all_blocks()            
@@ -415,13 +482,24 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             t4 = time.time()
             print("New fit time" + str(t4-t3))
             del X_batch
+            
+            gc.collect()
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()            
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
 
         t2 = time.time()
 
         print("Fit time: " + str(t2-t1))  
 
-        pickle.dump(cp.asnumpy(dtm), open(exp_save_dir + DOCUMENT_TOPIC_FILEPATH, 'wb'))
-
+        pickle.dump(dtm, open(exp_save_dir + DOCUMENT_TOPIC_FILEPATH, 'wb')) # cp.asnumpy(dtm)
+        del dtm
+        gc.collect()
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()            
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+        pinned_mempool.free_all_blocks()
 
 
     epsilon = 1e-12
@@ -431,6 +509,10 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
     if create_meta_df==1:
         print("Create MetaData")
+        meta_dir = os.path.join(ROOT_DIR, OUT_ID_DATA_PREFIX)
+        if not os.path.exists(meta_dir):
+            os.makedirs(meta_dir)
+            
         for f in dl:
             print("Beginning MetaData Creation: " + f)
 
@@ -442,7 +524,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             df   = basic_clean(df)
 
             gc.collect()
-            df.to_csv(ROOT_DIR + OUT_ID_DATA_PREFIX+f)
+            
+            df.to_csv(meta_dir +f)
 
 
 
@@ -450,43 +533,123 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
 
 
-    if coherence == 0:
+    if coherence == 1:
         n_top_words = 20
 
         i=1
         for f in dl:             
-                print(f)
+            print(f)
+            if not os.path.exists(save_dir + X_FILEPATH):
                 X_batch = cupyx.scipy.sparse.csr_matrix( pickle.load(
                         open(save_dir + X_MAT_FILEPATH_PREFIX + Path(f).stem + '.obj','rb')))
                 if i == 1 :
                     X= X_batch
                 else: 
                     X       = cupyx.scipy.sparse.vstack([X,X_batch])
+
+                    del X_batch
+                    gc.collect()
                     mempool = cp.get_default_memory_pool()
                     mempool.free_all_blocks()            
                     pinned_mempool = cp.get_default_pinned_memory_pool()
                     pinned_mempool.free_all_blocks()
+                
+            gc.collect()
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()            
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
 
-                i +=1
+            if not os.path.exists(save_dir + X_LST_FILEPATH):
+                path_in      = os.path.join(inDir,f)
+                df = pd.read_csv(path_in, names = ['tweets'])
+                
+                mask = df['tweets'].str.len() > 10 
+                df   = df.loc[mask]
+                df   = cudf.from_pandas(df)
+                df = basic_clean(df)
+                
+                docs = countvec._preprocess(df['tweets'])
+                tokenized_df = countvec._create_tokenized_df(docs)
+                all_tokens = (tokenized_df.groupby('doc_id')['token'].agg(list)).reset_index(name='tokens')
+                
+                del tokenized_df
+                del df
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+                
+                curr_x_lst = all_tokens["tokens"].to_pandas().tolist()
+
+                if i == 1:
+                    X_lst = curr_x_lst
+                else:
+                    X_lst.extend(curr_x_lst)
+                
+                del all_tokens
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+
+#                 if i == 1:
+#                     X_df = df
+#                 else:
+#                     X_df = pd.concat([X_df, df], ignore_index = True)
+                
+#                 del df
+#                 pickle.dump(X_df, open(save_dir + X_DF_FILEPATH, "wb"))
+#             else:
+#                 X_df = pickle.load(open(save_dir + X_DF_FILEPATH, "rb"))
+            
+            i +=1
+        
+        if not os.path.exists(save_dir + X_LST_FILEPATH):
+            pickle.dump(X_lst, open(save_dir + X_LST_FILEPATH, "wb"))
+        else:
+            X_lst = pickle.load(open(save_dir + X_LST_FILEPATH, "rb"))
+        
+        if not os.path.exists(save_dir + X_FILEPATH):
+            pickle.dump(X, open(save_dir + X_FILEPATH, "wb"))
+        else:
+            X = pickle.load(open(save_dir + X_FILEPATH, "rb"))
+            
+            
         n = X.shape[0]
-        tcm = X.T.dot(X)
-        print(tcm.shape)
-        numerator   = cupyx.scipy.sparse.triu(tcm, k=1)
-        denominator = M1
-        print(denominator.shape)
-        score       = cp.log(((numerator.toarray()/n)+epsilon)/denominator)
-        topic_coh   = []
-        for k in range(0,num_tops):
-            t_n_indices   = tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
-            score_tmp     = score[cp.ix_(t_n_indices,t_n_indices)]
-            topic_coh.append(score_tmp.mean())
+        
+#         if not os.path.exists(save_dir + X_LST_FILEPATH):
+#             new_tweets = X_df["tweets"].str.split()
+#             X_lst = new_tweets.apply(lambda x: [' '.join(ng) for ng in everygrams(x, 1, 2)]).tolist()
+#             pickle.dump(X_lst, open(save_dir + X_LST_FILEPATH, "wb"))
+            
+#             del new_tweets
+#         else:
+#             X_lst = pickle.load(open(save_dir + X_LST_FILEPATH, "rb"))
+        
+        
+#         del X_df
+#         tcm = X.T.dot(X)
+#         print(tcm.shape)
+#         numerator   = cupyx.scipy.sparse.triu(tcm, k=1)
+#         denominator = M1
+#         print(denominator.shape)
+#         score       = cp.log(((numerator.toarray()/n)+epsilon)/denominator)
+#         topic_coh   = []
+#         for k in range(0,num_tops):
+#             t_n_indices   = tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
+#             score_tmp     = score[cp.ix_(t_n_indices,t_n_indices)]
+#             topic_coh.append(score_tmp.mean())
     
-        u_mass = sum(topic_coh)/k
-        print(u_mass)
+#         u_mass = sum(topic_coh)/k
+#         print(u_mass)
 
         ## Initialize 
         # Recover Topics
-        n_top_words = 100
+        gc.collect()
+        n_top_words = 20
 
         print(tlda.unwhitened_factors_)    
         topics = []
@@ -494,25 +657,69 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
         for k in range(0,num_tops): 
             if k ==0:
                 t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
-                topics.append(countvec.vocabulary_[t_n_indices])
+                topics.append(countvec.vocabulary_[t_n_indices].to_pandas().tolist())
                 
             if k >=1:
                 t_n_indices   =  tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
-                topics.append(countvec.vocabulary_[t_n_indices])
+                topics.append(countvec.vocabulary_[t_n_indices].to_pandas().tolist())
 
+        del tlda
+        gc.collect()
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()            
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+        pinned_mempool.free_all_blocks()
+        
         # dictionary: dict mapping from words to indices
         # convert sparse to gensim corpus
-        common_corpus = gensim.matutils.Sparse2Corpus(X.get(), documents_columns=False)
+        if not os.path.exists(save_dir + GENSIM_CORPUS_FILEPATH):
+            common_corpus = gensim.matutils.Sparse2Corpus(X.get(), documents_columns=False)
+            pickle.dump(common_corpus, open(save_dir + GENSIM_CORPUS_FILEPATH, "wb"))
+        else:
+            common_corpus = pickle.load(open(save_dir + GENSIM_CORPUS_FILEPATH, "rb"))
+        
         #convert countvec to gensim dictionary obj
         common_dictionary = {}
-        for key, val in countvec.vocabulary_.items():
+        for (val, key) in enumerate(countvec.vocabulary_.to_pandas().tolist()):
             common_dictionary[val] = key
+        dct = Dictionary()
+        _ = dct.merge_with(common_dictionary)
+        
+        del countvec
+        del X
+        gc.collect()
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()            
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+        pinned_mempool.free_all_blocks()
+        
         coherence ={}
         for cc in ['c_v', 'c_uci', 'c_npmi','u_mass']:
-            cm = CoherenceModel(topics=topics, corpus=common_corpus, dictionary=common_dictionary, coherence=cc,window_size=3)
+            t1 = time.time()
+            cm = CoherenceModel(topics=topics, texts=X_lst, corpus=common_corpus, dictionary=dct, coherence=cc)
             coherence[cc] = cm.get_coherence() 
             print(coherence)
+            t2 = time.time()
+            del cm
+            gc.collect()
+            mempool = cp.get_default_memory_pool()
+            mempool.free_all_blocks()            
+            pinned_mempool = cp.get_default_pinned_memory_pool()
+            pinned_mempool.free_all_blocks()
+            print(cc + " Coherence time: " + str(t2-t1))
+            
         pickle.dump(coherence, open(exp_save_dir + COHERENCE_FILEPATH, 'wb'))
+        
+        del topics
+        del X_lst
+        del common_corpus
+        del dct
+        gc.collect()
+        mempool = cp.get_default_memory_pool()
+        mempool.free_all_blocks()            
+        pinned_mempool = cp.get_default_pinned_memory_pool()
+        pinned_mempool.free_all_blocks()
+        
 
     output_dict = {
         "coherence": coherence,
@@ -534,13 +741,21 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     out_str = save_dir + "num_tops_" + str(num_tops) + "alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + ".json"
     with open(out_str, "w") as outfile:
         json.dump(output_dict, outfile)
+        
+    
+    gc.collect()
+    mempool = cp.get_default_memory_pool()
+    mempool.free_all_blocks()            
+    pinned_mempool = cp.get_default_pinned_memory_pool()
+    pinned_mempool.free_all_blocks()
     
 
 def main():
-    curr_dir = "metoo_evaluation"
-    first_run = True
+    curr_dir = "metoo_evaluation/"
+#     first_run = True
+    first_run = False
 
-    num_tops_lst = [20,40,60,80,100]
+    num_tops_lst = [int(sys.argv[1])] #[20,40,60,80,100]
     alpha_0_lst  = [0.01,0.001,0.1]
     lr_lst = [0.00001,0.00005,0.0001]
     theta_lst = [5.005]
@@ -558,10 +773,11 @@ def main():
             ortho_loss_param = x[4]
         )
         first_run = False
+        gc.collect()
     
 
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
                     
