@@ -40,7 +40,7 @@ from version0_99.tlda_wrapper import TLDA
 import version0_99.file_operations as fop
 
 
-ROOT_DIR        = "/raid/covid_scaling/data/"
+ROOT_DIR        = "/raid/debanks/covid_scaling/data/"
 INDIR           = "split_files/"
 RAW_DATA_PREFIX = "split_files/"
 
@@ -71,7 +71,7 @@ porter = PorterStemmer()
 
 
 def basic_clean(df):
-    df['tweets'] = df['tweets'].astype('str')
+    df['tweet'] = df['tweet'].astype('str')
     df = df.drop_duplicates(keep="first")
     return df
 
@@ -274,10 +274,10 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
             # read in dataframe 
-            df = pd.read_csv(path_in, names = ['tweets'])
+            df = pd.read_csv(path_in, names = ['date','id_str','tweet','user_id','screen_name','verified','retweet_count','favorite_count','location'],usecols=['tweet'])
             mempool = cp.get_default_memory_pool()
             mempool.free_all_blocks()
-            mask = df['tweets'].str.len() > 10 
+            mask = df['tweet'].str.len() > 10 
             df   = df.loc[mask]
             df   = cudf.from_pandas(df)
             # basic preprocessing
@@ -286,7 +286,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()
             gc.collect()
             
-            countvec.partial_fit(df['tweets'])
+            countvec.partial_fit(df['tweet'])
             print("End " + f)
 
             # count rows of data
@@ -319,10 +319,10 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
             # read in dataframe 
-            df = pd.read_csv(path_in, names = ['tweets'])
+            df = pd.read_csv(path_in, names = ['date','id_str','tweet','user_id','screen_name','verified','retweet_count','favorite_count','location'],usecols=['tweet'])
             mempool = cp.get_default_memory_pool()
             mempool.free_all_blocks()
-            mask = df['tweets'].str.len() > 10 
+            mask = df['tweet'].str.len() > 10 
             df   = df.loc[mask]
             df   = cudf.from_pandas(df)
             # basic preprocessing
@@ -332,7 +332,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             gc.collect()
 
             if save_files == 1:
-                corpus = countvec.transform(df['tweets'])
+                corpus = countvec.transform(df['tweet'])
                 X_batch = tl.tensor(corpus.toarray()) 
                 print(X_batch.shape[0])
                 pickle.dump(
@@ -576,7 +576,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
             gc.collect()
             df = pd.read_csv(os.path.join(ROOT_DIR + RAW_DATA_PREFIX,f),lineterminator='\n')
-            mask = df['tweets'].str.len() > 10 
+            mask = df['tweet'].str.len() > 10 
             df   = df.loc[mask]
             df   = cudf.from_pandas(df)
             df   = basic_clean(df)
@@ -620,14 +620,14 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
             if not os.path.exists(save_dir + X_LST_FILEPATH):
                 path_in      = os.path.join(inDir,f)
-                df = pd.read_csv(path_in, names = ['tweets'])
+                df = pd.read_csv(path_in, names = ['tweet'])
                 
-                mask = df['tweets'].str.len() > 10 
+                mask = df['tweet'].str.len() > 10 
                 df   = df.loc[mask]
                 df   = cudf.from_pandas(df)
                 df = basic_clean(df)
                 
-                docs = countvec._preprocess(df['tweets'])
+                docs = countvec._preprocess(df['tweet'])
                 tokenized_df = countvec._create_tokenized_df(docs)
                 all_tokens = (tokenized_df.groupby('doc_id')['token'].agg(list)).reset_index(name='tokens')
                 
