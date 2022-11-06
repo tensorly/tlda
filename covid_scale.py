@@ -73,6 +73,8 @@ porter = PorterStemmer()
 def basic_clean(df):
     df['tweet'] = df['tweet'].astype('str')
     df = df.drop_duplicates(keep="first")
+    df['tweet'] = df['tweet'].str.lower()
+    df['tweet'] = df['tweet'].str.replace(r'[^\w\s]+', '')
     return df
 
 
@@ -95,17 +97,18 @@ added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","
                "said","talk","congrats","congratulations","are","as","i", "time","abus","year","mani",
                "me", "my", "myself", "we", "our", "ours", "ourselves", "use","look","movement","assault",
                "you", "your", "yours","he","her","him","she","hers","that","harass","whi","feel","say","gt",
-               "be","with","their","they're","is","was","been","not","they","way","thi","rt","i","we","and","to","for","do","go",
-               "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell",
-               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani",
-               "call", "wouldnt","wow", "learned","hi"   , "things" ,"thing","can't","can","right","got","show",
+               "be","with","their","they're","is","was","been","not","they","way","thi","rt","i","we","and",
+               "to","for","do","go",
+               "it","have",  "one","think",   "thing","bring","put","well","take","exactli","tell",
+               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani","covid-19","-",
+               "call", "wouldnt","wow", "learned","hi","-","", "things" ,"thing","can't","can","right","got","show",
                "cant","will","go","going","let","would","could","him","his","think","thi","ha","onli","back",
                "lets","let's","say","says","know","talk","talked","talks","dont","think","watch","right",
                "said","something","this","was","has","had","abc","rt","ha","haha","hat","even","happen",
                "something","wont","people","make","want","went","goes","people","had","also","ye","still","must",
                "person","like","come","from","yet","able","wa","yah","yeh","yeah","onli","ask","give","read",
-               "need","us", "men", "women", "get", "man", "amp","amp&","yr","yrs",
-               "shirt", "vs"]
+               "need", "men", "women", "get", "man", "amp","amp&","yr","yrs","&amp;","amp",
+               "shirt", "vs","iâ€™m","|",]
 
 
 
@@ -155,12 +158,12 @@ max_data_rows = 1.2e6
 
 # declare the stop words 
 stop_words = (stopwords.words('english'))
-added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank", "watch",
+added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank", "watch","covid19","coronavirus",
                "said","talk","congrats","congratulations","are","as", "time","year","mani","trump",
-                "use","look","that","whi","feel","say","gt","to","do",
-               "be","with","their","they're","is","was","been","not","they","way","thi",
-               "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell",
-               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani",
+                "use","look","that","whi","feel","say","gt","to","do","if","the","in","of","do","don't",
+               "be","with","their","they're","is","was","been","not","they","way","thi","we","you","but","who",
+               "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell","when",
+               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani","why","where","how","what",
                "call", "wouldnt","wow", "learned","hi"   , "things" ,"thing","can't","can","right","got","show",
                "cant","will","go","going","let","would","could","him","his","think","thi","ha","onli","back",
                "lets","let's","say","says","know","talk","talked","talks","dont","think","watch","right",
@@ -168,7 +171,9 @@ added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank", 
                "something","wont","people","make","want","went","goes","people","had","also","ye","still","must",
                "person","like","come","from","yet","able","wa","yah","yeh","yeah","onli","ask","give","read",
                "need", "get", "amp","amp&","yr","yrs", "@", "#", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-               "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+               "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z","1","2","3","covid.",
+                 "4","5","6","7","8","0","9","=- he","as","a","this","that","their","his","her","our","we","us",".",
+                 "but","since","-","donâ€™t","iâ€™m","itâ€™s","my","getting","get","but","really","may","since","not","lot"]
 
 # set stop words and countvectorizer method
 stop_words= list(np.append(stop_words,added_words))
@@ -810,8 +815,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
 def main():
     curr_dir = "covid_experiment/"
-    first_run = True
-#    first_run = False
+#    first_run = True
+    first_run = False
 
     num_tops_lst = [int(sys.argv[1])] #[20,40,60,80,100]
     alpha_0_lst  = [0.01]
