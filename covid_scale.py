@@ -159,8 +159,8 @@ max_data_rows = 1.2e6
 # declare the stop words 
 stop_words = (stopwords.words('english'))
 added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank", "watch","covid19","coronavirus",
-               "said","talk","congrats","congratulations","are","as", "time","year","mani","trump",
-                "use","look","that","whi","feel","say","gt","to","do","if","the","in","of","do","don't",
+               "said","talk","congrats","congratulations","are","as", "time","year","mani","trump","im","19","2020",
+                "use","look","that","whi","feel","say","gt","to","do","if","the","in","of","do","don't","many",
                "be","with","their","they're","is","was","been","not","they","way","thi","we","you","but","who",
                "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell","when",
                "good","day","work", "latest","today","becaus","peopl","via","see","old","ani","why","where","how","what",
@@ -815,8 +815,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
 def main():
     curr_dir = "covid_experiment/"
-#    first_run = True
-    first_run = False
+    first_run = True
+    #first_run = False
 
     num_tops_lst = [int(sys.argv[1])] #[20,40,60,80,100]
     alpha_0_lst  = [0.01]
