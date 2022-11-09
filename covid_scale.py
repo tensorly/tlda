@@ -160,8 +160,8 @@ max_data_rows = 1.2e6
 stop_words = (stopwords.words('english'))
 added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank", "watch","covid19","coronavirus",
                "said","talk","congrats","congratulations","are","as", "time","year","mani","trump","im","19","2020",
-                "use","look","that","whi","feel","say","gt","to","do","if","the","in","of","do","don't","many",
-               "be","with","their","they're","is","was","been","not","they","way","thi","we","you","but","who",
+                "use","look","that","whi","feel","say","gt","to","do","if","the","in","of","do","don't","many","much","every","thats","this",
+               "be","with","their","they're","is","was","been","not","they","way","thi","we","you","but","who","youre","didnt",""
                "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell","when",
                "good","day","work", "latest","today","becaus","peopl","via","see","old","ani","why","where","how","what",
                "call", "wouldnt","wow", "learned","hi"   , "things" ,"thing","can't","can","right","got","show",
@@ -683,31 +683,6 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             
         n = X.shape[0]
         
-#         if not os.path.exists(save_dir + X_LST_FILEPATH):
-#             new_tweets = X_df["tweets"].str.split()
-#             X_lst = new_tweets.apply(lambda x: [' '.join(ng) for ng in everygrams(x, 1, 2)]).tolist()
-#             pickle.dump(X_lst, open(save_dir + X_LST_FILEPATH, "wb"))
-            
-#             del new_tweets
-#         else:
-#             X_lst = pickle.load(open(save_dir + X_LST_FILEPATH, "rb"))
-        
-        
-#         del X_df
-#         tcm = X.T.dot(X)
-#         print(tcm.shape)
-#         numerator   = cupyx.scipy.sparse.triu(tcm, k=1)
-#         denominator = M1
-#         print(denominator.shape)
-#         score       = cp.log(((numerator.toarray()/n)+epsilon)/denominator)
-#         topic_coh   = []
-#         for k in range(0,num_tops):
-#             t_n_indices   = tlda.unwhitened_factors_[:,k].argsort()[:-n_top_words - 1:-1]
-#             score_tmp     = score[cp.ix_(t_n_indices,t_n_indices)]
-#             topic_coh.append(score_tmp.mean())
-    
-#         u_mass = sum(topic_coh)/k
-#         print(u_mass)
 
         ## Initialize 
         # Recover Topics
@@ -815,8 +790,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
 def main():
     curr_dir = "covid_experiment/"
-    first_run = True
-    #first_run = False
+    #first_run = True
+    first_run = False
 
     num_tops_lst = [int(sys.argv[1])] #[20,40,60,80,100]
     alpha_0_lst  = [0.01]
