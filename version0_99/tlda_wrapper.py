@@ -65,7 +65,7 @@ class TLDA():
     def _partial_fit_second_order(self, X_batch):
         for j in range(0, len(X_batch), self.second_order.batch_size):
             y  = X_batch[j:j+self.second_order.batch_size]
-            self.second_order.partial_fit(y)
+            self.second_order.partial_fit(y - self.mean)
             del y 
     
     def _partial_fit_third_order(self, X_batch):
@@ -118,6 +118,8 @@ class TLDA():
         else:
             # First time we see the batch: recompute the whitened version next time
             self._partial_fit_first_order(X_batch)
+
+            # X_batch is centered in _partial_fit_second_order
             self._partial_fit_second_order(X_batch)
             self.seen_batches[batch_index] = 0
 
@@ -132,6 +134,7 @@ class TLDA():
         X_batch : tensor of shape (batch_size, self.vocab)
         """        
         self._partial_fit_first_order(X_batch)
+        # mean subtracted in second order partial fit
         self._partial_fit_second_order(X_batch)
         X_batch = self.second_order.transform(X_batch - self.mean)
         self._partial_fit_third_order(X_batch)
