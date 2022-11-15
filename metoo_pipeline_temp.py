@@ -121,7 +121,7 @@ def custom_preprocessor(doc):
     return doc
 
 
-def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_rate = 0.0004, theta_param = 5.005, ortho_loss_param = 1000):
+def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_rate = 0.0004, theta_param = 5.005, ortho_loss_param = 1000, initialize_first_docs = False):
     # set you text pre-processing params 
     countvec = CountVectorizer( stop_words = stop_words, # works
                                 lowercase = True, # works
@@ -137,7 +137,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
         
-    exp_save_dir = os.path.join(save_dir, "num_tops_" + str(num_tops) + "_alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "/")
+    exp_save_dir = os.path.join(save_dir, "num_tops_" + str(num_tops) + "_alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "_initialize_first_docs_" + str(initialize_first_docs) + "/")
     if not os.path.exists(exp_save_dir):
         os.makedirs(exp_save_dir)
 
@@ -320,6 +320,9 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     tot_tlda_time = 0.0
     gc.collect()
     if stgd == 1:
+        # keep track of iteration
+        i = 0
+
         t1 = time.time()
         for f in dl:
             mempool = cp.get_default_memory_pool()
@@ -342,27 +345,29 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             gc.collect()
             
             t3 = time.time()
-            for j in range(0, max(1, len(X_batch)-(batch_size_pca-1)), batch_size_pca):
-                k = j + batch_size_pca
-
-                # Check if remainder is undersized
-                if (len(X_batch) - k) < batch_size_pca:
-                    k = len(X_batch)
-                
-                mempool = cp.get_default_memory_pool()
-                mempool.free_all_blocks()            
-                pinned_mempool = cp.get_default_pinned_memory_pool()
-                pinned_mempool.free_all_blocks()
-                y = tl.tensor(X_batch[j:k])
-                
-                tlda.partial_fit_online(y)
-
-                del y
+            if initialize_first_docs and i == 0:
+                tlda.fit(X_batch, order = 1)
                 gc.collect()
                 mempool = cp.get_default_memory_pool()
                 mempool.free_all_blocks()            
                 pinned_mempool = cp.get_default_pinned_memory_pool()
                 pinned_mempool.free_all_blocks()
+
+                tlda._partial_fit_second_order(X_batch)
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+
+                tlda.fit(X_batch, order=3)
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+            else:
+                tlda.partial_fit_online(X_batch)
 
             t4 = time.time()
             print("New fit time" + str(t4-t3))
@@ -374,6 +379,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()            
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
+
+            i += 1
         t2 = time.time()
     
         print("Fit time: " + str(t2-t1))
@@ -738,7 +745,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
         }
     }
 
-    out_str = save_dir + "num_tops_" + str(num_tops) + "alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + ".json"
+    out_str = save_dir + "num_tops_" + str(num_tops) + "alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "_initialize_first_docs_" + str(initialize_first_docs) + ".json"
     with open(out_str, "w") as outfile:
         json.dump(output_dict, outfile)
         
@@ -760,6 +767,7 @@ def main():
     lr_lst = [0.00001,0.00005,0.0001]
     theta_lst = [5.005]
     ortho_lst = [1000]
+    initialize_first_docs = True
 
     combined_lst = [[i, j, k, l, m] for i in num_tops_lst for j in alpha_0_lst for k in lr_lst for l in theta_lst for m in ortho_lst]
 
@@ -770,7 +778,8 @@ def main():
             alpha_0 = x[1], 
             learning_rate = x[2], 
             theta_param = x[3], 
-            ortho_loss_param = x[4]
+            ortho_loss_param = x[4],
+            initialize_first_docs=initialize_first_docs
         )
         first_run = False
         gc.collect()

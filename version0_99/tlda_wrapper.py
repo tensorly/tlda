@@ -34,7 +34,7 @@ class TLDA():
         self.third_order  = ThirdOrderCumulant(n_topic, alpha_0, n_iter_train, n_iter_test, third_order_cumulant_batch,
                                                learning_rate, gamma_shape, theta, ortho_loss_criterion, random_seed)
 
-    def fit(self,X):
+    def fit(self,X, order=None):
         """
         Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and 
         the tensors required to compute its word-topic distribution fit in memory.
@@ -43,15 +43,21 @@ class TLDA():
         ----------
         X: tensor of size (self.n_documents , self.vocab) all documents used to fit the word-topic distribution
         """
-        self.n_documents = X.shape[0]
-        self.vocab = X.shape[1]
-        self.mean = tl.mean(X, axis=0)
+        if order is None or order == 1:
+            self.n_documents = X.shape[0]
+            self.vocab = X.shape[1]
+            self.mean = tl.mean(X, axis=0)
 
-        X_cent = X - self.mean
-        self.second_order.fit(X_cent)
+        if order is None or order == 2:
+            self.second_order.fit(X - self.mean)
         
-        X_whit = self.second_order.transform(X_cent)
-        self.third_order.fit(X_whit,verbose=False)
+        if order is None or order == 3:
+            X_whit = self.second_order.transform(X - self.mean)
+            self.third_order.fit(X_whit,verbose=False)
+            del X_whit
+
+        del X
+
 
     
     def _partial_fit_first_order(self, X_batch):
@@ -61,17 +67,20 @@ class TLDA():
         else:
             self.mean = ((self.mean * self.n_documents) + tl.sum(X_batch, axis=0)) / (self.n_documents + X_batch.shape[0])
         self.n_documents += X_batch.shape[0]
+        del X_batch
 
     def _partial_fit_second_order(self, X_batch):
         for j in range(0, len(X_batch), self.second_order.batch_size):
             y  = X_batch[j:j+self.second_order.batch_size]
             self.second_order.partial_fit(y - self.mean)
             del y 
+        del X_batch
     
     def _partial_fit_third_order(self, X_batch):
         for j in range(0, len(X_batch), self.third_order_cumulant_batch):
             y  = X_batch[j:j+self.third_order_cumulant_batch]
             self.third_order.partial_fit(y) 
+        del X_batch
 
     def partial_fit(self, X_batch, batch_index, save_folder=None):
         """
@@ -138,6 +147,7 @@ class TLDA():
         self._partial_fit_second_order(X_batch)
         X_batch = self.second_order.transform(X_batch - self.mean)
         self._partial_fit_third_order(X_batch)
+        del X_batch
 
     def _unwhiten_factors(self):
         """Unwhitens self.third_order.factors_, then uncenters and unnormalizes"""
