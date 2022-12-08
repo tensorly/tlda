@@ -40,11 +40,14 @@ from version0_99.tlda_wrapper import TLDA
 import version0_99.file_operations as fop
 
 
+
+# Constants
+
 ROOT_DIR        = "/raid/debanks/covid_scaling/data/"
 INDIR           = "split_files/"
 RAW_DATA_PREFIX = "split_files/"
 
-# Constants
+
 # Output Relative paths -- do not change
 X_MAT_FILEPATH_PREFIX = "x_mat/"
 X_FILEPATH = "X_full.obj"
@@ -55,13 +58,13 @@ GENSIM_CORPUS_FILEPATH = "corpus.obj"
 COUNTVECTOR_FILEPATH = "countvec.obj"
 TLDA_FILEPATH = "tlda.obj"
 VOCAB_FILEPATH = "vocab.csv"
+EXISTING_VOCAB_FILEPATH = "vocab.obj"
 TOPIC_FILEPATH_PREFIX   = 'predicted_topics/'
 DOCUMENT_TOPIC_FILEPATH = 'dtm.csv'
 COHERENCE_FILEPATH = 'coherence.obj'
 DOCUMENT_TOPIC_FILEPATH_TOT = 'dtm_df.csv'
 OUT_ID_DATA_PREFIX = 'ids/' 
 TOP_WORDS_FILEPATH ='top_words.csv'
-
 
 # Device settings
 backend="cupy"
@@ -76,6 +79,7 @@ def basic_clean(df):
     df['tweet'] = df['tweet'].str.lower()
     df['tweet'] = df['tweet'].str.replace(r'[^\w\s]+', '')
     return df
+
 
 
 def partial_fit(self , data):
@@ -110,71 +114,6 @@ added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank","
                "need", "men", "women", "get", "man", "amp","amp&","yr","yrs","&amp;","amp",
                "shirt", "vs","iâ€™m","|",]
 
-
-
-stop_words= list(np.append(stop_words,added_words))
-CountVectorizer.partial_fit = partial_fit
-
-
-# set you text pre-processing params 
-countvec = CountVectorizer( stop_words = stop_words, # works
-                            lowercase = True, # works
-                            ngram_range = (1,2), ## allow for bigrams
-                            # toggle these two argumets so that you have 2000 words total in the dictionary
-                            #max_df = 10000, # limit this to 10,000 ## 500000 for 8M
-                            max_df = 100000, #100000, # limit this to 10,000 ## 500000 for 8M
-                            min_df = 2500)# 2000) ## limit this to 20 ## 2500 for 8M
-
-
- # MeTooMonthCleaned" # input('Name of input directory? : ')
-
-# Learning parameters
-num_tops = 20 #100 # 50 topics :(931, 93, 1258) coherence: 2277 (lr=0.00003 )
-alpha_0 = 0.01
-batch_size_pca  = 100000  # this will handle 2000 words + 100 topics ad infinite number of documents 
-#batch_size_pca  = 5000 # for whitening
-batch_size_grad = 25000 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
-n_iter_train    = 1000
-n_iter_test     = 1
-# 0.0005
-learning_rate   = 0.005 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
-theta_param = 5.005
-smoothing   = 1e-5
-ortho_loss_param = 40
-
-# Program controls
-split_files = 0
-vocab_build = 0
-save_files  = 0
-pca_run     = 0
-whiten      = 0
-stgd        = 1
-coherence   = 1
-# Other globals
-num_data_rows = 0
-max_data_rows = 1.2e6
-
-#
-
-# declare the stop words 
-stop_words = (stopwords.words('english'))
-added_words = ["thread","say","will","has","by","for","hi","hey","hah","thank", "watch","covid19","coronavirus",
-               "said","talk","congrats","congratulations","are","as", "time","year","mani","trump","im","19","2020",
-                "use","look","that","whi","feel","say","gt","to","do","if","the","in","of","do","don't","many","much","every","thats","this",
-               "be","with","their","they're","is","was","been","not","they","way","thi","we","you","but","who","youre","didnt",""
-               "it","have",  "one","think",   "thing"    ,"bring","put","well","take","exactli","tell","when",
-               "good","day","work", "latest","today","becaus","peopl","via","see","old","ani","why","where","how","what",
-               "call", "wouldnt","wow", "learned","hi"   , "things" ,"thing","can't","can","right","got","show",
-               "cant","will","go","going","let","would","could","him","his","think","thi","ha","onli","back",
-               "lets","let's","say","says","know","talk","talked","talks","dont","think","watch","right",
-               "said","something","this","was","has","had","abc","rt","ha","haha","hat","even","happen",
-               "something","wont","people","make","want","went","goes","people","had","also","ye","still","must",
-               "person","like","come","from","yet","able","wa","yah","yeh","yeah","onli","ask","give","read",
-               "need", "get", "amp","amp&","yr","yrs", "@", "#", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-               "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z","1","2","3","covid.",
-                 "4","5","6","7","8","0","9","=- he","as","a","this","that","their","his","her","our","we","us",".",
-                 "but","since","-","donâ€™t","iâ€™m","itâ€™s","my","getting","get","but","really","may","since","not","lot"]
-
 # set stop words and countvectorizer method
 stop_words= list(np.append(stop_words,added_words))
 CountVectorizer.partial_fit = partial_fit
@@ -184,41 +123,41 @@ def custom_preprocessor(doc):
     return doc
 
 
-def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_rate = 0.0004, theta_param = 5.005, ortho_loss_param = 1000):
+def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_rate = 0.0004, theta_param = 5.005, ortho_loss_param = 1000, initialize_first_docs = False, n_eigenvec = None): 
     # set you text pre-processing params 
-    countvec = CountVectorizer( stop_words = stop_words, # works
-                                lowercase = True, # works
-                                ngram_range = (1,2), ## allow for bigrams
-                                preprocessor = custom_preprocessor,
-                                # toggle these two argumets so that you have 2000 words total in the dictionary
-                                #max_df = 10000, # limit this to 10,000 ## 500000 for 8M
-                                max_df = 0.5, #100000, # limit this to 10,000 ## 500000 for 8M
-                                min_df = 0.005)# 2000) ## limit this to 20 ## 2500 for 8M
     
     # make final directories for outputs
     save_dir = os.path.join(ROOT_DIR, curr_dir)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-        
-    exp_save_dir = os.path.join(save_dir, "num_tops_" + str(num_tops) + "_alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "/")
+
+
+
+    countvec = CountVectorizer( stop_words = stop_words, #stop_words, # works
+                                lowercase = True,#True, # works
+                                ngram_range = (1, 2), #(1,2), ## allow for bigrams
+                                preprocessor = custom_preprocessor,
+                                max_df = 1.0, #100000, # limit this to 10,000 ## 500000 for 8M
+                                min_df = 0.0)# 2000) ## limit this to 20 ## 2500 for 8M
+    
+    eigenvec_str = "_n_eigenvec_" + (str(n_eigenvec) if n_eigenvec is not None else "None")
+    
+    exp_save_dir = os.path.join(save_dir, "num_tops_" + str(num_tops) + "_alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "_initialize_first_docs_" + str(initialize_first_docs) + eigenvec_str + "/")
     if not os.path.exists(exp_save_dir):
         os.makedirs(exp_save_dir)
 
     # inDir  = "/raid/debanks/MeToo/data/MeTooMonthCleaned" # MeTooMonthCleaned" # input('Name of input directory? : ')
 
-    # PARAMS SET IN INPUTS
-    # num_tops = 100 ## Try a range 10:100 
-    # alpha_0 = 0.01  #0.01 to 0.1
-    # learning_rate   = 0.0004 # increase bc increased batch size #30 topics # 0.00001 8000=-3325 (1180 seconds); 0.00002 8000=-3321 (452 seconds); 0.00003 8000=-3322 (275 seconds);  0.00004 8000=-3322 (907 seconds);
-    # theta_param = 5.005
-    # ortho_loss_param = 1000
 
     # DEFAULT PARAMS
-    batch_size_pca  = 25000  # this will handle 2000 words + 100 topics ad infinite number of documents 
-    batch_size_grad = 750 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
-    smoothing   = 1e-5
-    n_iter_train = 20
+    batch_size_pca  = 50000  # this will handle 2000 words + 100 topics ad infinite number of documents 
+    batch_size_grad = 12500 # 1% of data size - see what coherence looks like - can also try increasing  #divide data by 1,000 ## 800 = -3322.32 (6000 seecond) 4000=-3320 (1800 seconds) 8000=-3325 (1180 seconds)  Lower this to 1% of TOTAL data size
+    smoothing   = 1e-7
+    n_iter_train = 200
     n_iter_test = 10
+    
+    max_df = 0.5
+    min_df = 0.00125
     
     #SET SEED
     seed = 57
@@ -228,7 +167,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     save_files     = first_run
     stgd           = 1
     recover_top_words = 1
-    transform_data    = 1
+    transform_data    = 0
     create_meta_df    = 0
     coherence         = 1
 
@@ -268,21 +207,57 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
     # Build the vocabulary
     if vocab_build == 1:
-        for i, f in enumerate(dl):
-            print("Beginning vocabulary build: " + f)
-            path_in      = os.path.join(inDir,f)
-            # path_in_raw  = os.path.join(os.path.join(ROOT_DIR, RAW_DATA_PREFIX),f)
-            #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
-            # read in dataframe 
+        if not os.path.exists(save_dir + "/" + EXISTING_VOCAB_FILEPATH):
+            for i, f in enumerate(dl):
+                print("Beginning vocabulary build: " + f)
+                path_in      = os.path.join(inDir,f)
+                # path_in_raw  = os.path.join(os.path.join(ROOT_DIR, RAW_DATA_PREFIX),f)
+                #####!!!!!!!!! Read in the file as  a list and convert  to cudf (convert the pickled list to cudf dataframe)
+                # read in dataframe 
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+                # read in dataframe 
+                df = pd.read_csv(path_in, names = ['date','id_str','tweet','user_id','screen_name','verified','retweet_count','favorite_count','location'],usecols=['tweet'])
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()
+                mask = df['tweet'].str.len() > 10 
+                df   = df.loc[mask]
+                df   = cudf.from_pandas(df)
+                # basic preprocessing
+                df   = basic_clean(df)
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()
+                gc.collect()
+
+                countvec.partial_fit(df['tweet'])
+                print("End " + f)
+
+                # count rows of data
+                num_data_rows += len(df.index)
+                print(num_data_rows)
+                print(len(df.index))
+        else:
+            countvec.vocabulary_ = countvec.vocabulary
+            
+        len_arr = []
+        tot_len = 0
+        tot_sum = None
+        for f in dl:
+            print("Beginning vocab recompute: " + f)
+            path_in  = os.path.join(inDir,f)
+
+
             mempool = cp.get_default_memory_pool()
             mempool.free_all_blocks()
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
             # read in dataframe 
-            df = pd.read_csv(path_in, names = ['date','id_str','tweet','user_id','screen_name','verified','retweet_count','favorite_count','location'],usecols=['tweet'])
+            df = pd.read_csv(path_in, names = ['tweet'])
             mempool = cp.get_default_memory_pool()
             mempool.free_all_blocks()
-            mask = df['tweet'].str.len() > 10 
+            mask = df['tweets'].str.len() > 10 
             df   = df.loc[mask]
             df   = cudf.from_pandas(df)
             # basic preprocessing
@@ -291,17 +266,32 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()
             gc.collect()
             
-            countvec.partial_fit(df['tweet'])
-            print("End " + f)
+            X_batch = countvec.transform(df['tweet'])
+            if tot_sum is None:
+                tot_sum = cp.asnumpy(X_batch.sum(axis=0))
+            else:
+                tot_sum += cp.asnumpy(X_batch.sum(axis=0))
+            tot_len += X_batch.shape[0]
 
-            # count rows of data
-            num_data_rows += len(df.index)
-            print(num_data_rows)
-            print(len(df.index))
+            print("End " + f)
+            del df
+            del X_batch
+            del mask
+            
+        tot_mean = (tot_sum / tot_len).flatten()
+        true_vocab = np.where((tot_mean < max_df) & (tot_mean > min_df))
+        print(true_vocab)
+        countvec.vocabulary_ = Series((countvec.vocabulary_.to_numpy())[true_vocab])
+        del tot_sum
+        del tot_mean
+        
         # compute global mean of the vocab frequencies
         pickle.dump(countvec, open(os.path.join(save_dir, COUNTVECTOR_FILEPATH), 'wb'))
         # countvec = pickle.load(open(COUNTVECTOR_FILEPATH,'rb'))
         vocab = len(countvec.vocabulary_)
+        
+        df_voc = cudf.DataFrame({'words':countvec.vocabulary_})
+        df_voc.to_csv(save_dir + "/" + VOCAB_FILEPATH)
         
         print("right after countvec partial fit vocab\n\n\n: ", vocab)
         x_mat_dir = os.path.join(save_dir, X_MAT_FILEPATH_PREFIX)
@@ -313,6 +303,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
         # M1_sum = tl.zeros(vocab)
         len_arr = []
         tot_len = 0
+        tot_sum = None
         for f in dl:
             print("Beginning transform/mean: " + f)
             path_in  = os.path.join(inDir,f)
@@ -324,7 +315,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
             # read in dataframe 
-            df = pd.read_csv(path_in, names = ['date','id_str','tweet','user_id','screen_name','verified','retweet_count','favorite_count','location'],usecols=['tweet'])
+            df = pd.read_csv(path_in, names = ['tweet'])
             mempool = cp.get_default_memory_pool()
             mempool.free_all_blocks()
             mask = df['tweet'].str.len() > 10 
@@ -339,6 +330,11 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             if save_files == 1:
                 corpus = countvec.transform(df['tweet'])
                 X_batch = tl.tensor(corpus.toarray()) 
+                if tot_sum is None:
+                    tot_sum = tl.sum(X_batch, axis=0)
+                else:
+                    tot_sum += tl.sum(X_batch, axis=0)
+                tot_len += X_batch.shape[0]
                 print(X_batch.shape[0])
                 pickle.dump(
                     (X_batch), 
@@ -353,9 +349,6 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             print("End " + f)
             del df
             del mask
-
-        df_voc = cudf.DataFrame({'words':countvec.vocabulary_})
-        df_voc.to_csv(save_dir + "/" + VOCAB_FILEPATH)
 
         # pickle.dump(countvec, open(save_dir + COUNTVECTOR_FILEPATH, 'wb'))
         # del M1_sum
@@ -377,12 +370,17 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     tlda = TLDA(
         num_tops, alpha_0, n_iter_train, n_iter_test,learning_rate, 
         pca_batch_size = batch_size_pca, third_order_cumulant_batch = batch_size_grad, 
-        gamma_shape = 1.0, smoothing = smoothing, theta=theta_param, ortho_loss_criterion = ortho_loss_param, random_seed = seed
+        gamma_shape = 1.0, smoothing = smoothing, theta=theta_param, ortho_loss_criterion = ortho_loss_param, random_seed = seed, 
+        n_eigenvec = n_eigenvec,
     )
 
     tot_tlda_time = 0.0
     gc.collect()
     if stgd == 1:
+        # keep track of iterations
+        i = 0
+        X_whits = []
+        
         t1 = time.time()
         for f in dl:
             mempool = cp.get_default_memory_pool()
@@ -404,28 +402,46 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             pinned_mempool.free_all_blocks()
             gc.collect()
             
+            
             t3 = time.time()
-            for j in range(0, max(1, len(X_batch)-(batch_size_pca-1)), batch_size_pca):
-                k = j + batch_size_pca
-
-                # Check if remainder is undersized
-                if (len(X_batch) - k) < batch_size_pca:
-                    k = len(X_batch)
-                
-                mempool = cp.get_default_memory_pool()
-                mempool.free_all_blocks()            
-                pinned_mempool = cp.get_default_pinned_memory_pool()
-                pinned_mempool.free_all_blocks()
-                y = tl.tensor(X_batch[j:k])
-                
-                tlda.partial_fit_online(y)
-
-                del y
+            
+            # set initial values using full fit of first month
+            if initialize_first_docs and i == 0:
+                tlda.fit(X_batch, order = 1)
                 gc.collect()
                 mempool = cp.get_default_memory_pool()
                 mempool.free_all_blocks()            
                 pinned_mempool = cp.get_default_pinned_memory_pool()
                 pinned_mempool.free_all_blocks()
+                
+                tlda._partial_fit_second_order(X_batch)
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+                
+                X_whit_lst = []
+                for j in range(0, len(X_batch), batch_size_pca):
+                    y  = X_batch[j:j+batch_size_pca]
+                    X_whit_lst.append(tlda.second_order.transform(y - tlda.mean))
+                    del y 
+                X_whit = tl.concatenate(X_whit_lst, axis=0)
+                del X_whit_lst
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+                
+                tlda.third_order.fit(X_whit)
+                gc.collect()
+                mempool = cp.get_default_memory_pool()
+                mempool.free_all_blocks()            
+                pinned_mempool = cp.get_default_pinned_memory_pool()
+                pinned_mempool.free_all_blocks()
+            else:
+                tlda.partial_fit_online(X_batch)
 
             t4 = time.time()
             print("New fit time" + str(t4-t3))
@@ -437,6 +453,11 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             mempool.free_all_blocks()            
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
+            
+            i += 1
+
+
+
         t2 = time.time()
     
         print("Fit time: " + str(t2-t1))
@@ -449,11 +470,9 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     if stgd == 0:
         tlda = pickle.load(open(exp_save_dir + TLDA_FILEPATH,'rb'))
         tlda.unwhitened_factors_= tlda._unwhiten_factors()
-        # M1       = pickle.load(open(M1_FILEPATH,'rb'))
-        # print("vocab: M1 shape: ", M1.shape)
+
 
         print("Load TLDA")
-        # num_data_rows = 11192442# 7976703 # delete after testing
 
 
     if recover_top_words == 1:
@@ -496,12 +515,9 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             pinned_mempool = cp.get_default_pinned_memory_pool()
             pinned_mempool.free_all_blocks()
             print("Beginning Document Fitting: " + f)
-            # cp.ndarray.get(
             X_batch = pickle.load(
                         open(save_dir + X_MAT_FILEPATH_PREFIX + Path(f).stem + '.obj','rb')
-                        #open(f,'rb')
                     )
-                # )
         
             
             mempool = cp.get_default_memory_pool()
@@ -510,12 +526,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             pinned_mempool.free_all_blocks()
             batch_size_grad = 50000
             t3 = time.time()
-            
-#             if dtm is not None:
-#                 dtm = np.concatenate((dtm,cp.asnumpy(tlda.transform(X_batch))),axis=0) # tl.concatenate, no as numpy
-#             else:
-#                 dtm = cp.asnumpy(tlda.transform(X_batch)) # take out cp as numpy
-            
+
+
             for j in range(0, max(1, len(X_batch)-(batch_size_grad-1)), batch_size_grad):
                 k = j + batch_size_grad
 
@@ -658,6 +670,8 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
                 pinned_mempool = cp.get_default_pinned_memory_pool()
                 pinned_mempool.free_all_blocks()
 
+
+
             i +=1
         
         if not os.path.exists(save_dir + X_LST_FILEPATH):
@@ -672,7 +686,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             
             
         n = X.shape[0]
-        
+
 
         ## Initialize 
         # Recover Topics
@@ -761,12 +775,12 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
             "batch_size_pca": batch_size_pca,
             "batch_size_grad": batch_size_grad,
             "smoothing": smoothing,
-            "n_iter_train": 1,
-            "n_iter_test": 10
+            "n_iter_train": n_iter_train,
+            "n_iter_test": n_iter_test
         }
     }
 
-    out_str = save_dir + "num_tops_" + str(num_tops) + "alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + ".json"
+    out_str = save_dir + "num_tops_" + str(num_tops) + "alpha0_" + str(alpha_0) + "_learning_rate_" + str(learning_rate) + "_theta_" + str(theta_param) + "_orthogonality_" + str(ortho_loss_param) + "_initialize_first_docs_" + str(initialize_first_docs) + eigenvec_str + ".json"
     with open(out_str, "w") as outfile:
         json.dump(output_dict, outfile)
         
@@ -776,20 +790,26 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     mempool.free_all_blocks()            
     pinned_mempool = cp.get_default_pinned_memory_pool()
     pinned_mempool.free_all_blocks()
-    
+
 
 def main():
-    curr_dir = "covid_experiment/"
-    #first_run = True
-    first_run = False
+    curr_dir = "covid_scaling/"
+    first_run = True
+#    first_run = False
 
-    num_tops_lst = [int(sys.argv[1])] #[20,40,60,80,100]
-    alpha_0_lst  = [0.01]
-    lr_lst = [0.0001]
+    num_tops_lst = [20,40,60,80,100]
+    alpha_0_lst  = [0.01, 0.001]
+    lr_lst = [0.0001, 0.0005, 0.00005, 0.00001, 0.001, 0.005]
     theta_lst = [5.005]
     ortho_lst = [1000]
+    initialize_first_docs = True
+    t = num_tops_lst[0]
+    pca_dim_lst = [t, t*2, t*4] if t < 80 else [t, t*2]
+    initialize_first_docs = True
 
-    combined_lst = [[i, j, k, l, m] for i in num_tops_lst for j in alpha_0_lst for k in lr_lst for l in theta_lst for m in ortho_lst]
+
+
+    combined_lst = [[i, j, k, l, m, n] for i in num_tops_lst for j in alpha_0_lst for k in lr_lst for l in theta_lst for m in ortho_lst for n in pca_dim_lst]
 
     for x in combined_lst:
         fit_topics(
@@ -798,14 +818,15 @@ def main():
             alpha_0 = x[1], 
             learning_rate = x[2], 
             theta_param = x[3], 
-            ortho_loss_param = x[4]
+            ortho_loss_param = x[4],
+            n_eigenvec = x[5],
+            initialize_first_docs = initialize_first_docs
         )
         first_run = False
         gc.collect()
-    
+
 
 
 
 if __name__ == "__main__":
     main()
-                    
