@@ -157,7 +157,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
     n_iter_test = 10
     
     max_df = 0.5
-    min_df = 0.00125
+    min_df = 0.025
     
     #SET SEED
     seed = 57
