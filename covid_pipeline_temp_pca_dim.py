@@ -793,7 +793,7 @@ def fit_topics(num_tops, curr_dir, first_run = False, alpha_0 = 0.01, learning_r
 
 
 def main():
-    curr_dir = "covid_scaling/"
+    curr_dir = "covid_experiment/"
     first_run = True
 #    first_run = False
 
