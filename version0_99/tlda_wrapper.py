@@ -1,6 +1,8 @@
 import pickle
 from pathlib import Path
 import tensorly as tl
+import gc
+import cupy as cp
 
 from .second_order_cumulant import SecondOrderCumulant
 from .third_order_cumulant import ThirdOrderCumulant
@@ -8,7 +10,7 @@ from .third_order_cumulant import ThirdOrderCumulant
 class TLDA():
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate, 
                 pca_batch_size=10000, third_order_cumulant_batch=1000 , gamma_shape=1.0, smoothing=1e-6, 
-                theta=1, ortho_loss_criterion=1000, random_seed=None):
+                theta=1, ortho_loss_criterion=1000, n_eigenvec = None, random_seed=None):
         """
         n_topic : 
         alpha : 
@@ -23,6 +25,9 @@ class TLDA():
         self.alpha_0   = alpha_0
         self.smoothing = smoothing
         self.third_order_cumulant_batch = third_order_cumulant_batch
+        if n_eigenvec is None:
+            n_eigenvec = n_topic
+        self.n_eigenved = n_eigenvec
         
         self.weights_  = tl.ones(self.n_topic)
         self.vocab = 0
@@ -30,11 +35,11 @@ class TLDA():
         self.mean = None
         self.unwhitened_factors_ = None
 
-        self.second_order = SecondOrderCumulant(n_topic, alpha_0, pca_batch_size)
+        self.second_order = SecondOrderCumulant(n_eigenvec, alpha_0, pca_batch_size)
         self.third_order  = ThirdOrderCumulant(n_topic, alpha_0, n_iter_train, n_iter_test, third_order_cumulant_batch,
-                                               learning_rate, gamma_shape, theta, ortho_loss_criterion, random_seed)
+                                               learning_rate, gamma_shape, theta, ortho_loss_criterion, random_seed, n_eigenvec = n_eigenvec)
 
-    def fit(self,X, order=None):
+    def fit(self, X, order = None):
         """
         Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and 
         the tensors required to compute its word-topic distribution fit in memory.
@@ -47,7 +52,7 @@ class TLDA():
             self.n_documents = X.shape[0]
             self.vocab = X.shape[1]
             self.mean = tl.mean(X, axis=0)
-
+        
         if order is None or order == 2:
             self.second_order.fit(X - self.mean)
         
@@ -55,10 +60,8 @@ class TLDA():
             X_whit = self.second_order.transform(X - self.mean)
             self.third_order.fit(X_whit,verbose=False)
             del X_whit
-
+            
         del X
-
-
     
     def _partial_fit_first_order(self, X_batch):
         if self.mean is None:
@@ -80,6 +83,7 @@ class TLDA():
         for j in range(0, len(X_batch), self.third_order_cumulant_batch):
             y  = X_batch[j:j+self.third_order_cumulant_batch]
             self.third_order.partial_fit(y) 
+            del y
         del X_batch
 
     def partial_fit(self, X_batch, batch_index, save_folder=None):
@@ -127,8 +131,6 @@ class TLDA():
         else:
             # First time we see the batch: recompute the whitened version next time
             self._partial_fit_first_order(X_batch)
-
-            # X_batch is centered in _partial_fit_second_order
             self._partial_fit_second_order(X_batch)
             self.seen_batches[batch_index] = 0
 
@@ -143,11 +145,11 @@ class TLDA():
         X_batch : tensor of shape (batch_size, self.vocab)
         """        
         self._partial_fit_first_order(X_batch)
-        # mean subtracted in second order partial fit
         self._partial_fit_second_order(X_batch)
-        X_batch = self.second_order.transform(X_batch - self.mean)
-        self._partial_fit_third_order(X_batch)
+        X_whit = self.second_order.transform(X_batch - self.mean)
         del X_batch
+        self._partial_fit_third_order(X_whit)
+        del X_whit
 
     def _unwhiten_factors(self):
         """Unwhitens self.third_order.factors_, then uncenters and unnormalizes"""

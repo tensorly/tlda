@@ -41,7 +41,7 @@ class ThirdOrderCumulant():
     """
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, batch_size, 
                  learning_rate, gamma_shape=1.0,
-                 theta=1, ortho_loss_criterion=1000, seed=None): # we could try to find a more informative name for alpha_0
+                 theta=1, ortho_loss_criterion=1000, seed=None, n_eigenvec=None): # we could try to find a more informative name for alpha_0
         """"
         Computes the third order cumulant from centered, whitened batches of data, returns the learn factorized cumulant
 
@@ -70,6 +70,9 @@ class ThirdOrderCumulant():
         # self.smoothing   = smoothing
         self.theta       =  theta
         # self.cumulant    = cumulant
+        if n_eigenvec is None:
+            n_eigenvec = self.n_topic
+        self.n_eigenvec = n_eigenvec
         
         # Initial values 
         log_norm_std = 1e-5
@@ -79,14 +82,16 @@ class ThirdOrderCumulant():
         # Finding optimal starting values based on orthonormal inits:
         while ortho_loss >= ortho_loss_criterion:
             if(tl.get_backend() == "cupy"):
-                init_values = tl.tensor(cp.random.uniform(-1, 1, size=(n_topic, n_topic)))
+                init_values = tl.tensor(cp.random.uniform(-1, 1, size=(n_eigenvec, n_topic)))
             else:
-                init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_topic, n_topic)))
+                init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_eigenvec, n_topic)))
+                
+            # init_values has shape (n_eigenvec, min(n_topic, n_eigenvec)) = (n_eigenvec, n_topic)
             init_values, _ = tl.qr(init_values, mode='reduced')
             ortho_loss = loss_rec(init_values, self.theta)
             i += 1
-            self.theta -= 0.1	
-            print(init_values)	
+            self.theta -= 0.01
+            print(init_values)
    
         self.factors_ = init_values
     
@@ -107,6 +112,7 @@ class ThirdOrderCumulant():
             learning_rate = self.learning_rate
         self.factors_ -= learning_rate*cumulant_gradient(self.factors_, X_batch, self.alpha_0,self.theta)
         self.factors_ /= tl.norm(self.factors_, axis=0)
+        del X_batch
 
     def fit(self, X, verbose = True):
         '''Update the factors directly from X using stochastic gradient descent
@@ -116,7 +122,7 @@ class ThirdOrderCumulant():
         X : ndarray of shape (number_documents, num_topics) equal to the whitened
             word counts in each document in the documents used to update the factors
         '''
-        tol = 1e-7 
+        tol = 1e-5 
         i   = 1
         max_diff = tol+1
         print("Fitting") 
@@ -125,12 +131,14 @@ class ThirdOrderCumulant():
             for j in range(0, len(X), self.batch_size):
                 y  = X[j:j+self.batch_size]
                 self.partial_fit(y)
+                del y
 
             max_diff = tl.max(tl.abs(self.factors_ - prev_fac))
             i += 1
             if verbose and i%5 ==0:
                 print(str(i)+"'th iteration complete. Maximum change in factors: "+str(max_diff))
-
+                
+        del X
         print("Total iterations: " + str(i))
 
 
@@ -155,8 +163,8 @@ class ThirdOrderCumulant():
         n_topics = self.n_topic
         n_docs = X_batch.shape[0]
 
-        gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
-        exp_elogthetad = tl.tensor(tl.exp(dirichlet_expectation(gammad))) #ndocs, n_topics
+        gammad = tl.tensor(cp.random.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
+        exp_elogthetad = tl.tensor(cp.exp(dirichlet_expectation(gammad))) #ndocs, n_topics ## CONVERT TO TL
         phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
         max_gamma_change = 1.0
         iter = 0
@@ -166,7 +174,7 @@ class ThirdOrderCumulant():
             x_phi_norm     =  X_batch / phinorm
             x_phi_norm_factors = tl.matmul(x_phi_norm,self.unwhitened_factors_)
             gammad         = ((exp_elogthetad * (x_phi_norm_factors)) + weights) # estimate for the variational mixing param
-            exp_elogthetad = tl.exp(dirichlet_expectation(gammad))
+            exp_elogthetad = tl.tensor(cp.exp(dirichlet_expectation(gammad))) ## CONVERT TO TL
             phinorm        = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20)
 
             mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
@@ -174,6 +182,8 @@ class ThirdOrderCumulant():
             iter += 1
             print("End Document Topic Prediction Iteration " + str(iter) +" out of "+str(self.n_iter_test))
             print("Current Maximal Change:" + str(max_gamma_change))
+            
+        del X_batch
         return gammad
 
     def predict(self, X_test, weights):
@@ -196,9 +206,10 @@ class ThirdOrderCumulant():
 
         gammad_l = self._predict_topic(X_test, weights)
         print(gammad_l.shape)
-        gammad_norm  = tl.exp(dirichlet_expectation(gammad_l))
+        gammad_norm  = tl.tensor(cp.exp(dirichlet_expectation(gammad_l))) ## CONVERT TO TL
         reshape_obj  = tl.sum(gammad_norm,axis=1)
         denom = tl.reshape(reshape_obj,(-1,1))
         gammad_norm2 = gammad_norm/denom
 
+        del X_test
         return gammad_norm2
