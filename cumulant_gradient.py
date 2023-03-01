@@ -1,9 +1,4 @@
 import tensorly as tl
-# This should work with any backend
-# tl.set_backend('pytorch')
-# from tensorly.cp_tensor import cp_mode_dot
-# import tensorly.tenalg as tnl
-# from tensorly.tenalg.core_tenalg import tensor_dot, batched_tensor_dot, outer, inner
 
 def cumulant_gradient(phi, y, alpha, theta=10):
     """Returns the gradient of loss with respect to the factors Phi

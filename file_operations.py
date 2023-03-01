@@ -6,8 +6,6 @@ import fileinput
 import dask.dataframe as dd
 import pandas as pd
 from tqdm import tqdm
-import pickle
-import time
 
 def _combine_files(dest_directory, filepaths):
     ''' '''
@@ -21,83 +19,6 @@ def _combine_files(dest_directory, filepaths):
     
     for filepath in filepaths:
         os.remove(filepath)
-
-
-'''
-def _split_file(src_directory, dest_directory, filename, chunk_size, size_threshold):
-    # delete
-    times = []
-
-    # Load data
-    start = time.time()
-    
-    curr_filepath = "{}/{}".format(src_directory, filename)
-    curr_file = open(curr_filepath, "rb")
-    X_batch = pickle.load(curr_file)
-    curr_file.close()
-
-    end = time.time()
-    times.append(("load data", end - start))
-
-    # computations
-    start = time.time() #
-
-    X_batch_len = len(X_batch)
-    num_rows, num_columns = X_batch.shape
-    itemsize = X_batch.itemsize
-
-    opt_rows_per_split = int(size_threshold / (num_columns * itemsize))
-    chunks_per_split = int(opt_rows_per_split / chunk_size)
-
-    end = time.time()
-    times.append(("computations", end - start))
-
-    # set up loop
-    split_number = 1
-    i = 0
-    j = i + (chunk_size * chunks_per_split)
-    while_cond = True
-
-    while (while_cond):
-        start = time.time()
-        # approx_split_size = X_batch.iloc[i:j,:].memory_usage().sum()
-        # approx_split_size = (j - i) * num_columns * itemsize
-
-        # Write to a file if the split size is large enough
-        # if (approx_split_size >= size_threshold) or (j >= X_batch_len):
-
-        # Check if remainder of the data is undersized
-        remaining =  X_batch_len - j
-
-        if (remaining <= 0 and i != 0):
-            return
-        elif (remaining < chunk_size):
-            curr_split  = X_batch[i:] # last batch
-            while_cond = False
-        else:
-            curr_split = X_batch[i:j]
-            i = j
-            j = i + (chunk_size * chunks_per_split)
-
-        # Write to a file
-        curr_split_filepath = "{}/{}_split_{}.obj".format(
-            dest_directory, 
-            Path(filename).stem, 
-            split_number
-        )
-
-        with open(curr_split_filepath, "wb") as curr_split_file:
-            pickle.dump(curr_split, curr_split_file)
-
-        # Future writes should be to a different file
-        split_number += 1
-
-        end = time.time()
-        times.append(("iteration", end - start))
-    
-    print("length of {}: {} GB".format(filename, os.path.getsize(curr_filepath)/1000000000))
-    print("times for {}: {}".format(filename, times))
-'''
 
 
 def _split_file(src_directory, dest_directory, filename, chunk_size, size_threshold):

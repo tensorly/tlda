@@ -9,30 +9,15 @@ import re
 
 import os
 
-import sys
-
 # remove stopwords
 import nltk
 from nltk.corpus import stopwords
-
-#from nltk.corpus import sentiwordnet as swn
-# Do this first, that'll do something eval()
-# to "materialize" the LazyCorpusLoader
-#next(swn.all_senti_synsets()) # This is most likely considerably more inefficient...
-
 nltk.download('stopwords')
-#import spacy
-#nlp = spacy.load("en_core_web_sm")
 
 import dask.dataframe as dd
 import pandas as pd
 
-# from stop_words import get_stop_words
-# stemming
 from nltk.stem import PorterStemmer
-# import cudf
-#from cuml.preprocessing.text.stem import PorterStemmer
-# lemmatization
 from nltk.stem import WordNetLemmatizer
 import string
 
@@ -80,21 +65,19 @@ def regexchars(line):
 
 # Tokenize
 def tokenize(line):
-#     """ Returns a list of tokens. """
-     tokens = p.tokenize(line)
-     # print(tokens)
-     return tokens.split()
+    """ Returns a list of tokens. """
+
+    tokens = p.tokenize(line)
+    return tokens.split()
 
 # Filtering function to remove stopwords from a line
 def removeStopwords(words):
-#     """ Takes as input a list returned from tokenize and
-#     returns a list of non-stop-words in the line. """
+    """ Takes as input a list returned from tokenize and
+    returns a list of non-stop-words in the line. """
 
-     filtered = filter(lambda word: word not in stop_words, words)
-     filtered2 = filter(lambda word: len(word) > 2, filtered)
-     return list(filtered2)
-
-     #return filtered2
+    filtered = filter(lambda word: word not in stop_words, words)
+    filtered2 = filter(lambda word: len(word) > 2, filtered)
+    return list(filtered2)
 
 def stem(words):
     return " ".join([stemmer.stem(x) for x in words])
@@ -103,30 +86,16 @@ def lemmatize_stem(words):
     """ Takes as input a list of words from "removeStopwords and
     lemmatizes each word, joins them, and returns them as the final
     preprocessed string. """
-    # lemmatizer = WordNetLemmatizer()
+
     lemmatized_words = [lemmatizer.lemmatize(x) for x in words]
-    #stemmed_words = [stemmer.stem(x) for x in words]
     res = " ".join(lemmatized_words)
-    #print(res)
+
     return res
-
-# def lemmatize(text, nlp=nlp):
-#
-#     doc = nlp(" ".join(text))
-#
-#     lemmatized = [token.lemma_ for token in doc]
-#     print(lemmatized)
-#     return lemmatized
-
-## Pre-process Data
-
-
 
 def applyfunctions(df):
     ls = df.tweets.map(check_ascii).map(cleanLine).map(regexchars).\
     apply(tokenize).apply(stem)
-     #.\
-    #apply(removeStopwords).apply(stem).apply(tokenize)
+
     return pd.DataFrame(ls)
 
 def preprocess(inFile, outputFile):
@@ -136,13 +105,9 @@ def preprocess(inFile, outputFile):
     # Load in csv, 1 partition per cpu
     df = pd.read_csv(inFile, engine='python')
 
-    #df.columns = ['reply_text', 'vader']
-    #df = df[['reply_text']]
     df = df[['tweets']]
-
-    # dask_dataframe = dd.from_pandas
     dask_dataframe = dd.from_pandas(df, npartitions=-2)
-    #df = applyfunctions(df)
+
     # Map functions to each partition
     result = dask_dataframe.map_partitions(applyfunctions, meta=df)
     print("mapped partitions...")
@@ -157,9 +122,6 @@ def preprocess(inFile, outputFile):
 
 
 if __name__ == '__main__':
-
-    #  inFile = input('Name of input file?: ')
-    #  outputFile = input('Name of output file? : ')
     inDir  = "../data/MeTooMonth/" # input('Name of input directory? : ')
     outDir = "../data/MeTooMonthCleaned/" # input('Name of output directory? : ')
 
@@ -169,6 +131,4 @@ if __name__ == '__main__':
         path_in  = os.path.join(inDir,f)
         path_out = os.path.join(outDir,f)
         preprocess(path_in, path_out)
-
-    #parseFile(inFile, outputFile)
 

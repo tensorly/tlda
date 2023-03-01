@@ -1,5 +1,5 @@
-from ..tlda import TLDA
-from ..pca import PCA
+from ..third_order_cumulant import ThirdOrderCumulant
+from ..second_order_cumulant import SecondOrderCumulant
 import tensorly as tl
 import numpy as np
 import numpy.random
@@ -83,13 +83,13 @@ def test_fit():
 
     M1 = tl.mean(x, axis=0)
     x_cent = tl.tensor(x - M1)
-    pca = PCA(num_tops, alpha_0, batch_size_pca)
+    pca = SecondOrderCumulant(num_tops, alpha_0, batch_size_pca)
     pca.fit(x_cent)
     W = pca.projection_weights_ / tl.sqrt(pca.whitening_weights_)[None, :]
     x_whit = pca.transform(x_cent)
 
     '''fit the tensor lda model'''
-    tlda = TLDA(num_tops, alpha_0, n_iter_train,n_iter_test ,batch_size_grad ,learning_rate,gamma_shape = 1.0, smoothing = 1e-6,theta=theta_param)
+    tlda = ThirdOrderCumulant(num_tops, alpha_0, n_iter_train,n_iter_test ,batch_size_grad ,learning_rate,gamma_shape = 1.0, smoothing = 1e-6,theta=theta_param)
     tlda.fit(x_whit,W,verbose=True)
     factors_unwhitened = tlda.postprocess(pca, M1, vocab)
 

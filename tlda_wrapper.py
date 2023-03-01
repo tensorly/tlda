@@ -1,8 +1,6 @@
 import pickle
 from pathlib import Path
 import tensorly as tl
-import gc
-import cupy as cp
 
 from .second_order_cumulant import SecondOrderCumulant
 from .third_order_cumulant import ThirdOrderCumulant
