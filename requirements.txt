@@ -1,0 +1,6 @@
+numpy
+scipy
+pytest
+pytest-cov
+tensorly
+tensorly-torch
