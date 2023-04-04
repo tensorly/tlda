@@ -52,9 +52,9 @@ config = {
     'long_description': README,
     'long_description_content_type' : 'text/x-rst',
     'authors': [
-        {'name': "Sara", 'email': "jean.kossaifi@gmail.com"},
-        {'name': "Jean", 'email': ""},
-        {'name': "Danny", 'email': ""},
+        {'name': "Sara", 'email': ""},
+        {'name': "Jean", 'email': "jean.kossaifi@gmail.com"},
+        {'name': "Danny", 'email': "daniel.c.ebanks@gmail.com"},
         ],
     'version': VERSION,
     'url': 'https://github.com/tensorly/tlda',

@@ -8,18 +8,9 @@ except ImportError:
 class SecondOrderCumulant():
     """
     Class to compute the third order cumulant
-
-    Parameters
-    ----------
-    n_eigenvec : int
-        Corresponds to the number of topics in the Tensor LDA
-    alpha_0 : int
-        Mixing parameter for the topic weights
-    batch_size : int
-        Size of the batch to use for online learning
-    n_docs : int
-        Running count of fitted documents. Used for normalization
     """
+
+
     def __init__(self, n_eigenvec, alpha_0, batch_size): # n_eigenvec here corresponds to n_topic in the LDA
         self.n_eigenvec = n_eigenvec
         self.alpha_0 = alpha_0
@@ -30,7 +21,17 @@ class SecondOrderCumulant():
         elif tl.get_backend()  == "cupy":
             self.pca = cuml.IncrementalPCA(n_components = self.n_eigenvec, batch_size = self.batch_size)
 
+    """
+    Computes the second order cumulant from centered batches of data, returns the whitened tensor
 
+    Parameters
+    ----------
+    n_eigenvec : int Corresponds to the number of topics in the Tensor LDA
+    alpha_0 : int Mixing parameter for the topic weights
+    batch_size : int Size of the batch to use for online learning
+    n_docs : int Running count of fitted documents. Used for normalization
+    """
+    
     def fit(self, X):
         '''
         Method to fit the entire data to get the projection weights (singular vectors) and
