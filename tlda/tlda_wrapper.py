@@ -6,18 +6,22 @@ from .second_order_cumulant import SecondOrderCumulant
 from .third_order_cumulant import ThirdOrderCumulant
 
 class TLDA():
+    """
+    Class to learn topic-word distributoin from a corpus of documents
+    """
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate, 
                 pca_batch_size=10000, third_order_cumulant_batch=1000 , gamma_shape=1.0, smoothing=1e-6, 
                 theta=1, ortho_loss_criterion=1000, n_eigenvec = None, random_seed=None):
         """
-        n_topic : 
-        alpha : 
+        Parameters
+        ----------
+        n_topic : int
+        alpha : int
         n_iter_train : int
         n_iter_test : int
         learning_rate : float
-        pca_batch_size : int, default is 10K
-        third_order_cumulant_batch = 1K
-        
+        pca_batch_size : int
+        third_order_cumulant_batch : int
         """
         self.n_topic   = n_topic
         self.alpha_0   = alpha_0
