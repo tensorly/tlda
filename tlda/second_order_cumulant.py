@@ -6,7 +6,8 @@ except ImportError:
     pass
 
 class SecondOrderCumulant():
-    """Class to compute the second order cumulant
+    """
+    Class to compute the third order cumulant
 
     Parameters
     ----------
@@ -31,7 +32,8 @@ class SecondOrderCumulant():
 
 
     def fit(self, X):
-        '''Fit the entire data to get the projection weights (singular vectors) and
+        '''
+        Method to fit the entire data to get the projection weights (singular vectors) and
         whitening weights (scaled explained variance) of a centered input dataset X.
 
         Parameters

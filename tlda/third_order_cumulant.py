@@ -1,7 +1,7 @@
 import numpy as np
 import tensorly as tl
 
-from  cumulant_gradient import cumulant_gradient
+from  .cumulant_gradient import cumulant_gradient
 
 try:
     import cupy as cp
