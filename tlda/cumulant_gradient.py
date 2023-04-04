@@ -4,7 +4,11 @@ def cumulant_gradient(phi, y, alpha, theta=10):
     """Returns the gradient of loss with respect to the factors Phi
 
     The loss corresponds to the reconstruction error of the third order cumulant (squared Frobenius norm)
-    plus an orthogonality term on the learned factors (equation 11 in the paper).
+    plus an orthogonality term on the learned factors (equation 16 in [1]).
+    
+    [1] Furong Huang, U. N. Niranjan, Mohammad Umar Hakeem, Animashree Anandkumar. 2015. 
+    Online Tensor Methods for Learning Latent Variable Models. Journal of Machine Learning Research 16, 
+    86 (2015), 2797–2835. http://jmlr.org/papers/v16/huang15a.html
 
     Parameters
     ----------
