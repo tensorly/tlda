@@ -24,8 +24,8 @@ copyright = f'{year}, TODO authors'
 author = 'TODO authors'
 
 # The full version, including alpha/beta/rc tags
-import neuralop
-release = neuralop.__version__
+import tlda
+release = tlda.__version__
 
 
 # -- General configuration ---------------------------------------------------
