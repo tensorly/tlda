@@ -12,17 +12,19 @@ def cumulant_gradient(phi, y, alpha, theta=10):
 
     Parameters
     ----------
-    phi : tensor of shape (n_features, rank)
-        the factors we are trying to learn
-        We are decomposing the actual cumulant tensor T as phi o phi o phi (where o is outer product)
-    y : the centered parameter of the actual cumulant
-    alpha : 
-    theta : int, default is 1
+    phi :   tensor of shape (n_features, rank)
+            the word-topic distribution (factors) we are trying to learn
+            We are decomposing the actual cumulant tensor T as phi o phi o phi (where o is outer product) and phi are the eigenvalues of this decomposition
+    y :     the whitened, centered data of the actual cumulant
+    alpha : int
+            mixing parameter for the topic distribution.  Increase to encourage more concentration in the learned topics.
+    theta : int 
+            orthognality penalty. default is 10. Increase to encourage more orthogonality between learned topics
 
     Returns
     -------
     gradient : tensor of shape (n_features, rank)
-        d(loss)/d(Phi)
+        d(loss)/d(phi) computes the gradient of the loss with respect to the factors phi 
     """
     gradient = 3*(1 + theta)*tl.dot(phi, tl.dot(phi.T, phi)**2)
     gradient -= 3*(1 + alpha)*(2 + alpha)/(2*y.shape[0])*tl.dot(y.T, tl.dot(y, phi)**2)

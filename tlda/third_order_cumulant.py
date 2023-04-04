@@ -1,7 +1,7 @@
 import numpy as np
 import tensorly as tl
 
-from  .cumulant_gradient import cumulant_gradient
+from  cumulant_gradient import cumulant_gradient
 
 try:
     import cupy as cp
@@ -13,7 +13,7 @@ except ImportError:
 def dirichlet_expectation(alpha):
     '''Normalize alpha using the dirichlet distribution'''
 
-    return cpsci.digamma(alpha) - cpsci.digamma(sum(alpha))
+    return tl.digamma(alpha) - tl.digamma(sum(alpha))
 
 def loss_rec(factor, theta):
     '''Inputs:
@@ -156,7 +156,7 @@ class ThirdOrderCumulant():
         n_topics = self.n_topic
         n_docs = X_batch.shape[0]
 
-        gammad = tl.tensor(cp.random.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) ## not working
+        gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) 
         exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) #ndocs, n_topics ## CONVERT TO TL
         phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
         max_gamma_change = 1.0
@@ -168,7 +168,7 @@ class ThirdOrderCumulant():
             x_phi_norm     =  X_batch / phinorm
             x_phi_norm_factors = tl.matmul(x_phi_norm,self.unwhitened_factors_)
             gammad         = ((exp_elogthetad * (x_phi_norm_factors)) + weights) # estimate for the variational mixing param
-            exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) ## CONVERT TO TL
+            exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) 
             phinorm        = tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20
 
             mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics

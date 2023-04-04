@@ -15,9 +15,9 @@ class SecondOrderCumulant():
     alpha_0 : int
         Mixing parameter for the topic weights
     batch_size : int
-        Size of the mini-batch to use for the online learning
+        Size of the batch to use for online learning
     n_docs : int
-        Total number of documents fitted so far, used for normalization
+        Running count of fitted documents. Used for normalization
     """
     def __init__(self, n_eigenvec, alpha_0, batch_size): # n_eigenvec here corresponds to n_topic in the LDA
         self.n_eigenvec = n_eigenvec
