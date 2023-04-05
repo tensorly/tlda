@@ -15,6 +15,7 @@ API reference
     :template: class.rst
 
     ThirdOrderCumulant
+    SecondOrderCumulant
 
 
 
