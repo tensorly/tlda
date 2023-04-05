@@ -91,7 +91,7 @@ html_theme = 'tensorly_sphinx_theme'
 html_show_sphinx = False
 
 html_theme_options = {
-    'github_url': 'https://github.com/TensorLy/tlda',
+    'github_url': 'https://github.com/TensorLy/lda',
     # 'google_analytics' : 'G-QSPLEF75VT',
     'nav_links' : [('Install', 'install'),
                    ('User Guide', 'user_guide/index'),
