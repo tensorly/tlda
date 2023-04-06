@@ -16,10 +16,10 @@ API reference
 
     ThirdOrderCumulant
     SecondOrderCumulant
+    TLDA
 
 
 
 
 
     
-
