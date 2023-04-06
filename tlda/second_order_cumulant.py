@@ -12,6 +12,16 @@ class SecondOrderCumulant():
 
 
     def __init__(self, n_eigenvec, alpha_0, batch_size): # n_eigenvec here corresponds to n_topic in the LDA
+        """
+        Computes the second order cumulant from centered batches of data, returns the whitened tensor
+
+        Parameters
+        ----------
+        n_eigenvec : int Corresponds to the number of topics in the Tensor LDA
+        alpha_0 : int Mixing parameter for the topic weights
+        batch_size : int Size of the batch to use for online learning
+        n_docs : int Running count of fitted documents. Used for normalization
+        """
         self.n_eigenvec = n_eigenvec
         self.alpha_0 = alpha_0
         self.batch_size = batch_size
@@ -20,17 +30,6 @@ class SecondOrderCumulant():
             self.pca = IncrementalPCA(n_components = self.n_eigenvec, batch_size = self.batch_size)
         elif tl.get_backend()  == "cupy":
             self.pca = cuml.IncrementalPCA(n_components = self.n_eigenvec, batch_size = self.batch_size)
-
-    """
-    Computes the second order cumulant from centered batches of data, returns the whitened tensor
-
-    Parameters
-    ----------
-    n_eigenvec : int Corresponds to the number of topics in the Tensor LDA
-    alpha_0 : int Mixing parameter for the topic weights
-    batch_size : int Size of the batch to use for online learning
-    n_docs : int Running count of fitted documents. Used for normalization
-    """
     
     def fit(self, X):
         '''
@@ -99,4 +98,3 @@ class SecondOrderCumulant():
         X_unwhit = tl.dot(X, (self.projection_weights_ * tl.sqrt(self.whitening_weights_)).T)
         del X
         return X_unwhit
-        #return tl.dot(X, (self.projection_weights_ / tl.sqrt(self.whitening_weights_)[None, :]).T)

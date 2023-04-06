@@ -3,12 +3,6 @@ import tensorly as tl
 
 from  .cumulant_gradient import cumulant_gradient
 
-try:
-    import cupy as cp
-    import cupyx.scipy.special as cpsci
-except ImportError:
-    pass
-
 
 def dirichlet_expectation(alpha):
     '''Normalize alpha using the dirichlet distribution'''
@@ -52,10 +46,7 @@ class ThirdOrderCumulant():
         learning_rate : float
         cumulant : 
         """
-        if(tl.get_backend() == "cupy"):
-            cp.random.seed(seed)
-        else:
-            np.random.seed(seed)
+        rng = tl.check_random_state(seed)
 
         self.n_topic = n_topic
         self.alpha_0 = alpha_0
@@ -75,10 +66,7 @@ class ThirdOrderCumulant():
 
         # Finding optimal starting values based on orthonormal inits:
         while ortho_loss >= ortho_loss_criterion:
-            if(tl.get_backend() == "cupy"):
-                init_values = tl.tensor(cp.random.uniform(-1, 1, size=(n_eigenvec, n_topic)))
-            else:
-                init_values = tl.tensor(np.random.uniform(-1, 1, size=(n_eigenvec, n_topic)))
+            init_values = tl.tensor(rng.uniform(-1, 1, size=(n_eigenvec, n_topic)))
                 
             # init_values has shape (n_eigenvec, min(n_topic, n_eigenvec)) = (n_eigenvec, n_topic)
             init_values, _ = tl.qr(init_values, mode='reduced')
