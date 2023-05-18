@@ -29,7 +29,7 @@ class TLDA():
         self.third_order_cumulant_batch = third_order_cumulant_batch
         if n_eigenvec is None:
             n_eigenvec = n_topic
-        self.n_eigenved = n_eigenvec
+        self.n_eigenvec = n_eigenvec
         
         self.weights_  = tl.ones(self.n_topic)
         self.vocab = 0
