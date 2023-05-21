@@ -178,7 +178,7 @@ class TLDA():
         return factors_unwhitened
 
     @property
-    def unwhitened_factors(self): # This doesnt work
+    def unwhitened_factors(self): 
         """Unwhitened learned factors of shape (n_topic, vocabulary_size)
 
         On the first call, this will compute and store the unwhitened factors.
@@ -186,8 +186,7 @@ class TLDA():
         """
         if self.unwhitened_factors_ is None:
             self.unwhitened_factors_ = self._unwhiten_factors()
-        else:
-            return self.unwhitened_factors_
+        return self.unwhitened_factors_
 
     def transform(self, X=None, predict=True):
         """
