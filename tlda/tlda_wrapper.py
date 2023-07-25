@@ -160,6 +160,9 @@ class TLDA():
         # Un-centers the data
         factors_unwhitened += tl.reshape(self.mean,(self.vocab,1))
         factors_unwhitened [factors_unwhitened  < 0.] = 0. # remove non-negative probabilities
+
+        # Save unwhitened factors before postprocessing
+        self.unwhitened_factors_raw_ = tl.copy(factors_unwhitened)
         
         # Smoothing
         factors_unwhitened *= (1. - self.smoothing)
@@ -173,8 +176,8 @@ class TLDA():
         self.weights_   = tl.tensor(alpha_norm)
 
         # Normalize the factors
-        
         factors_unwhitened /= factors_unwhitened.sum(axis=0)
+
         return factors_unwhitened
 
     @property
@@ -201,7 +204,7 @@ class TLDA():
 
         self.third_order.unwhitened_factors_ = self.unwhitened_factors_
         if predict:
-            predicted_topics = self.third_order.predict(X, self.weights_)
+            predicted_topics = self.third_order.predict(X, self.unwhitened_factors_raw_, self.weights_)
             return predicted_topics
         
-        return predicted_topics
+        return
