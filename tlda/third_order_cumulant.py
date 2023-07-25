@@ -123,53 +123,7 @@ class ThirdOrderCumulant():
         print("Total iterations: " + str(i))
 
 
-    def _predict_topic(self, X_batch, weights, verbose = True):
-        '''Infer the document-topic distribution vector for a given document
-
-        Parameters
-        ----------
-        doc : tensor of length vocab_size equal to the number of occurrences
-                      of each word in the vocabulary in a document
-
-        adjusted_factor : tensor of shape (number_topics, vocabulary_size) equal to the learned
-               document-topic distribution
-
-        Returns
-        -------
-        gammad : tensor of shape (1, n_cols) equal to the document/topic distribution
-                 for the doc vector
-        '''
-
-        # factors = nvocab x ntopics
-        n_topics = self.n_topic
-        n_docs = X_batch.shape[0]
-
-        gammad = tl.tensor(tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics))) 
-        exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) #ndocs, n_topics ## CONVERT TO TL
-        phinorm = (tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20) #ndoc X nwords
-        max_gamma_change = 1.0
-        iter = 0
-        if verbose:
-            print("Begin Document Topic Prediction")
-        while (max_gamma_change > 1e-2 and iter < self.n_iter_test):
-            lastgamma      = tl.copy(gammad)
-            x_phi_norm     =  X_batch / phinorm
-            x_phi_norm_factors = tl.matmul(x_phi_norm,self.unwhitened_factors_)
-            gammad         = ((exp_elogthetad * (x_phi_norm_factors)) + weights) # estimate for the variational mixing param
-            exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) 
-            phinorm        = tl.matmul(exp_elogthetad,self.unwhitened_factors_.T) + 1e-20
-
-            mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
-            max_gamma_change       = tl.max(mean_gamma_change_pdoc)
-            iter += 1
-            if verbose:
-                print("End Document Topic Prediction Iteration " + str(iter) +" out of "+str(self.n_iter_test))
-                print("Current Maximal Change:" + str(max_gamma_change))
-            
-        del X_batch
-        return gammad
-
-    def predict(self, X_test, weights):
+    def predict(self, X_test, adjusted_factors, weights):
         '''Infer the document/topic distribution from the factors and weights and
         make the factor non-negative
 
@@ -180,18 +134,36 @@ class ThirdOrderCumulant():
 
         Returns
         -------
-        gammad_norm2 : tensor of shape (number_documents, number_topics) equal to
+        gammad : tensor of shape (number_documents, number_topics) equal to
                        the normalized document/topic distribution for X_test
-
-        factor : tensor of shape (vocabulary_size, number_topics) equal to the
-                 adjusted factor
         '''
 
-        gammad_l = self._predict_topic(X_test, weights)
-        gammad_norm  = tl.exp(dirichlet_expectation(gammad_l)) ## CONVERT TO TL
-        reshape_obj  = tl.sum(gammad_norm,axis=1)
-        denom = tl.reshape(reshape_obj,(-1,1))
-        gammad_norm2 = gammad_norm/denom
+        # factors = nvocab x ntopics
+        n_topics = self.n_topic
+        n_docs = X_test.shape[0]
 
+        gammad = tl.gamma(self.gamma_shape, scale= 1.0/self.gamma_shape, size = (n_docs,n_topics)) 
+        exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) #ndocs, n_topic
+        
+        epsilon = tl.finfo(gammad.dtype).eps
+        phinorm = (tl.matmul(exp_elogthetad,adjusted_factors.T) + epsilon) #ndoc X nwords
+        max_gamma_change = 1.0
+
+        i = 0
+        print("Begin Document Topic Prediction")
+        while (max_gamma_change > 5e-3 and i < self.n_iter_test):
+            lastgamma      = tl.copy(gammad)
+            x_phi_norm     =  X_test / phinorm
+            x_phi_norm_factors = tl.matmul(x_phi_norm, adjusted_factors)
+            gammad         = ((exp_elogthetad * (x_phi_norm_factors)) + weights) # estimate for the variational mixing param
+            exp_elogthetad = tl.exp(dirichlet_expectation(gammad)) 
+            phinorm        = (tl.matmul(exp_elogthetad,adjusted_factors.T) + epsilon)
+
+            mean_gamma_change_pdoc = tl.sum(tl.abs(gammad - lastgamma),axis=1) / n_topics
+            max_gamma_change       = tl.max(mean_gamma_change_pdoc)
+            i += 1
+            print("End Document Topic Prediction Iteration " + str(i) +" out of "+str(self.n_iter_test))
+            print("Current Maximal Change:" + str(max_gamma_change))
+            
         del X_test
-        return gammad_norm2
+        return gammad
