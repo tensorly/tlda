@@ -44,6 +44,7 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
           git rm -r dev/*
+          mkdir -p dev
           echo ${CWD}
           echo $(ls)
           cp -r doc/build/html/* dev
