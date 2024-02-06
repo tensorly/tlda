@@ -31,9 +31,11 @@ jobs:
           python -m pip install -e .
       - name: Make doc
         run: |
+          CWD=`pwd`
           cd doc
           make html
           cd ..
+          echo ${CWD}
       - name: Push docs
         run: |
           # See https://github.community/t/github-actions-bot-email-address/17204/5
@@ -42,6 +44,8 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
           git rm -r dev/*
+          echo ${CWD}
+          echo $(ls)
           cp -r doc/build/html/* dev/
           git add dev
           # If the doc is up to date, the script shouldn't fail, hence --allow-empty
