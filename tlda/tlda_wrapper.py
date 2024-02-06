@@ -7,7 +7,7 @@ from .third_order_cumulant import ThirdOrderCumulant
 
 class TLDA():
     """
-    Class to learn topic-word distributoin from a corpus of documents
+    Class to learn topic-word distribution from a corpus of documents
     """
     def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate, 
                 pca_batch_size=10000, third_order_cumulant_batch=1000 , gamma_shape=1.0, smoothing=1e-6, 
