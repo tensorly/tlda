@@ -32,7 +32,6 @@ jobs:
       - name: Make doc
         run: |
           cd doc
-          python minify.py
           make html
           cd ..
       - name: Push docs

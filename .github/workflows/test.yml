@@ -17,7 +17,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
-        python -m pip install -r ./doc/requirements_doc.txt
+        python -m pip install -r doc/requirements_doc.txt
         python -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
     - name: Install TensorLy dev
       run: |
@@ -34,4 +34,4 @@ jobs:
         python -m pip install -e .
     - name: Test with pytest
       run: |
-        pytest -vvv tltorch
+        pytest -vvv tlda
