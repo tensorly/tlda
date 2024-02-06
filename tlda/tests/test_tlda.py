@@ -89,7 +89,7 @@ def test_fit():
     x_whit = pca.transform(x_cent)
 
     '''fit the tensor lda model'''
-    tlda = ThirdOrderCumulant(num_tops, alpha_0, n_iter_train,n_iter_test ,batch_size_grad ,learning_rate,gamma_shape = 1.0, smoothing = 1e-6,theta=theta_param)
+    tlda = ThirdOrderCumulant(num_tops, alpha_0, n_iter_train,n_iter_test ,batch_size_grad ,learning_rate,gamma_shape = 1.0, theta=theta_param)
     tlda.fit(x_whit,W,verbose=True)
     factors_unwhitened = tlda.postprocess(pca, M1, vocab)
 
