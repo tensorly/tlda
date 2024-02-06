@@ -1,4 +1,4 @@
-from cumulant_gradient import cumulant_gradient
+from ..cumulant_gradient import cumulant_gradient
 import tensorly as tl
 from tensorly.testing import assert_array_almost_equal
 
