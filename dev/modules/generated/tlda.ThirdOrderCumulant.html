@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>tlda.ThirdOrderCumulant &#8212; tlda 0.1.0 documentation</title> 
+<link rel="stylesheet" href="../../_static/tensorly_style.css">
+<link rel="apple-touch-icon" sizes="180x180" href="../../_static/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../_static/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../_static/favicon/favicon-16x16.png">
+<link rel="manifest" href="../../_static/favicon/site.webmanifest">
+<link rel="mask-icon" href="../../_static/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="../../_static/favicon/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/tensorly_style.css?v=a02e9698" />
+
+  
+    <script src="../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+ <script src="../../_static/navbar_burger.js"></script>
+ <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"></script>
+ 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="tlda.SecondOrderCumulant" href="tlda.SecondOrderCumulant.html" />
+    <link rel="prev" title="API reference" href="../api.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  </head>
+<body  class="has-navbar-fixed-top">
+
+  <header>
+    <navbar>
+      <nav class="navbar top-navbar is-fixed-top has-shadow is-flex-wrap-wrap" role="navigation" aria-label="main top navigation">
+        <div class="navbar-brand">
+        
+
+          <a class="navbar-item" href="../../index.html">
+            <img src="../../_static/tensorly-lda.png" height="28">
+          </a>
+          <a class="navbar-item is-hidden-desktop" href="https://github.com/TensorLy/lda" target="_blank">
+              <span class="icon"><i class="fab fa-github"></i></span>
+          </a>
+
+          <a role="button" class="navbar-burger" data-target="top-nav-menu" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+
+        </div>
+        
+        <div class="navbar-menu" id="top-nav-menu">
+        
+
+          <div class="navbar-start">
+            
+              <a class="navbar-item" href="../../install.html">
+              Install
+            </a>
+              <a class="navbar-item" href="../../user_guide/index.html">
+              User Guide
+            </a>
+              <a class="navbar-item" href="../api.html">
+              API
+            </a>
+          </div>
+        
+          <div class="navbar-end">
+            <div class="navbar-item">
+            
+            <a class="button is-hidden-touch is-dark" href="https://github.com/TensorLy/lda" target="_blank">
+              <span class="icon-text">
+                <span class="icon is-large">
+                  <i class="fab fa-github"></i>
+                </span>
+                <span>Github</span>
+              </span>
+            </a>
+
+            </div> 
+          </div> 
+        </div> 
+
+      </nav>
+      
+    </navbar>
+  </header>
+
+
+  <div id="column-container">
+  <div class="columns is-mobile is-centered">
+	
+  
+      <div class="column is-10-mobile is-one-third-tablet is-3-desktop is-hidden-mobile" id="sidebar">
+    
+    <aside class="sticky-nav sidebar-menu">
+<div class="sidebar-search">
+  <form class="field" id="searchbox" role="search" action="../../search.html" method="get">
+    <!-- <label class="label" id="searchlabel">Quick search</label> -->
+    <div class="field has-addons">
+      <div class="control is-expanded">
+        <input class="input" type="text" placeholder="Search the doc" name="q" aria-labelledby="searchlabel autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      </div>
+      <div class="control">
+        <input class="button is-info" type="submit" value="Go" />
+      </div>
+    </div>
+  </form>
+  <script>document.getElementById('searchbox').style.display = "block"</script>
+
+</div>
+      
+      <div class="sidebar-menu-toc">
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installing TLDA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tlda</span></code>.ThirdOrderCumulant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlda.SecondOrderCumulant.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tlda</span></code>.SecondOrderCumulant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tlda.TLDA.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tlda</span></code>.TLDA</a></li>
+</ul>
+</li>
+</ul>
+ 
+      </div>
+    </aside>
+  </div>
+  
+
+  <div class="column main-column">
+
+    
+    <div class="main-section">
+
+      
+      
+      <div class="side-menu-toggle">
+        <button class="button" id="toggle-sidebar" onclick="toggle_sidebar()">
+          <span class="icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
+          <span>menu</span> 
+        </button>
+      </div>
+      
+
+      <div class="container content main-content">
+        
+  <section id="tlda-thirdordercumulant">
+<h1><a class="reference internal" href="../api.html#module-tlda" title="tlda"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tlda</span></code></a>.ThirdOrderCumulant<a class="headerlink" href="#tlda-thirdordercumulant" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="tlda.ThirdOrderCumulant">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tlda.</span></span><span class="sig-name descname"><span class="pre">ThirdOrderCumulant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho_loss_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_eigenvec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tlda/third_order_cumulant.html#ThirdOrderCumulant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tlda.ThirdOrderCumulant" title="Link to this definition"></a></dt>
+<dd><p>Class to compute the third order cumulant</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tlda.ThirdOrderCumulant.fit" title="tlda.ThirdOrderCumulant.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X[, verbose])</p></td>
+<td><p>Update the factors directly from X using stochastic gradient descent</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tlda.ThirdOrderCumulant.partial_fit" title="tlda.ThirdOrderCumulant.partial_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partial_fit</span></code></a>(X_batch[, learning_rate])</p></td>
+<td><p>Update the factors directly from the batch using stochastic gradient descent</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tlda.ThirdOrderCumulant.predict" title="tlda.ThirdOrderCumulant.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(X_test, adjusted_factors, weights)</p></td>
+<td><p>Infer the document/topic distribution from the factors and weights and make the factor non-negative</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="tlda.ThirdOrderCumulant.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tlda/third_order_cumulant.html#ThirdOrderCumulant.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tlda.ThirdOrderCumulant.partial_fit" title="Link to this definition"></a></dt>
+<dd><p>Update the factors directly from the batch using stochastic gradient descent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X_batch</strong><span class="classifier">ndarray of shape (number_documents, num_topics) equal to the whitened</span></dt><dd><p>word counts in each document in the documents used to update the factors</p>
+</dd>
+<dt><strong>verbose</strong><span class="classifier">bool, optional</span></dt><dd><p>if True, print information about every 200th iteration</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tlda.ThirdOrderCumulant.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tlda/third_order_cumulant.html#ThirdOrderCumulant.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tlda.ThirdOrderCumulant.fit" title="Link to this definition"></a></dt>
+<dd><p>Update the factors directly from X using stochastic gradient descent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">ndarray of shape (number_documents, num_topics) equal to the whitened</span></dt><dd><p>word counts in each document in the documents used to update the factors</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tlda.ThirdOrderCumulant.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjusted_factors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tlda/third_order_cumulant.html#ThirdOrderCumulant.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tlda.ThirdOrderCumulant.predict" title="Link to this definition"></a></dt>
+<dd><p>Infer the document/topic distribution from the factors and weights and
+make the factor non-negative</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X_test</strong><span class="classifier">ndarray of shape (number_documents, vocabulary_size) equal to the word</span></dt><dd><p>counts in each test document</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>gammad</strong><span class="classifier">tensor of shape (number_documents, number_topics) equal to</span></dt><dd><p>the normalized document/topic distribution for X_test</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="clearer"></div></section>
+
+
+      </div>
+
+      
+        <nav class="pagination" role="navigation" aria-label="pagination">
+    
+    <a class="button pagination-previous" href="../api.html" title="previous page" accesskey="p">
+        <span class="icon">
+            <i class="fa fa-arrow-circle-left"></i>
+        </span>
+        <span>API reference</span>
+    </a>
+    
+    
+    <a class="button pagination-next" href="tlda.SecondOrderCumulant.html" title="next page" accesskey="n">
+        <span><code class="xref py py-mod docutils literal notranslate"><span class="pre">tlda</span></code>.SecondOrderCumulant </span>
+        <span class="icon">
+            <i class="fa fa-arrow-circle-right"></i>
+        </span>
+    </a>
+    
+</nav>
+
+      
+
+        <footer class="footer">
+    <div class="content has-text-centered">
+        <div class="block">
+          &copy; Copyright 2024, TODO authors.<br/>
+        </div>
+    </div>
+  </footer>
+
+    </div>
+
+  </div>  
+
+	
+    
+    <div class="column is-hidden-touch is-2-desktop is-one-fifth-widescreen" id="localtoc-column">
+
+    <aside class="sticky-nav localtoc"> 
+        <p class="menu-label"> 
+            <span class="icon-text">
+                <span class="icon"><i class="fas fa-duotone fa-list"></i></span>
+                <span> On this page </span>
+            </span>
+        </p>
+
+        <div class="menu menu-list localtoc-list">
+        <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tlda</span></code>.ThirdOrderCumulant</a><ul>
+<li><a class="reference internal" href="#tlda.ThirdOrderCumulant"><code class="docutils literal notranslate"><span class="pre">ThirdOrderCumulant</span></code></a><ul>
+<li><a class="reference internal" href="#tlda.ThirdOrderCumulant.partial_fit"><code class="docutils literal notranslate"><span class="pre">ThirdOrderCumulant.partial_fit()</span></code></a></li>
+<li><a class="reference internal" href="#tlda.ThirdOrderCumulant.fit"><code class="docutils literal notranslate"><span class="pre">ThirdOrderCumulant.fit()</span></code></a></li>
+<li><a class="reference internal" href="#tlda.ThirdOrderCumulant.predict"><code class="docutils literal notranslate"><span class="pre">ThirdOrderCumulant.predict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+    </aside>
+    </div>
+
+  
+
+  </div>  
+  </div> 
+
+  
+  <script>
+    function toggle_sidebar() {
+        var element = document.getElementById("sidebar");
+        var container = document.getElementById("column-container");
+        var localtoccolumn = document.getElementById("localtoc-column");
+        element.classList.toggle("hide-tablet");
+        element.classList.toggle("is-hidden-mobile");
+        container.classList.toggle("sidemenu-hidden");
+        localtoccolumn.classList.toggle("is-one-fifth-widescreen");
+        localtoccolumn.classList.toggle("is-2-desktop");
+        localtoccolumn.classList.toggle("is-3-desktop");
+    }
+  </script> 
+
+
+
+  </body>
+</html>

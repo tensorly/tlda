@@ -1,0 +1,11 @@
+﻿:mod:`tlda`.TLDA
+=======================
+
+.. currentmodule:: tlda
+
+.. autoclass:: TLDA
+   :members:
+
+.. raw:: html
+
+    <div class="clearer"></div>

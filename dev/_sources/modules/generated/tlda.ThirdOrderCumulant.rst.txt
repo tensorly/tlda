@@ -1,0 +1,11 @@
+﻿:mod:`tlda`.ThirdOrderCumulant
+=====================================
+
+.. currentmodule:: tlda
+
+.. autoclass:: ThirdOrderCumulant
+   :members:
+
+.. raw:: html
+
+    <div class="clearer"></div>

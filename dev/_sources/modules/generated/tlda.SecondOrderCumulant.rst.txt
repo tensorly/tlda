@@ -1,0 +1,11 @@
+﻿:mod:`tlda`.SecondOrderCumulant
+======================================
+
+.. currentmodule:: tlda
+
+.. autoclass:: SecondOrderCumulant
+   :members:
+
+.. raw:: html
+
+    <div class="clearer"></div>

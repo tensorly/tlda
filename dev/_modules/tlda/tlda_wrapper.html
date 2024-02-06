@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tlda.tlda_wrapper &#8212; tlda 0.1.0 documentation</title> 
+<link rel="stylesheet" href="../../_static/tensorly_style.css">
+<link rel="apple-touch-icon" sizes="180x180" href="../../_static/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../_static/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../_static/favicon/favicon-16x16.png">
+<link rel="manifest" href="../../_static/favicon/site.webmanifest">
+<link rel="mask-icon" href="../../_static/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="../../_static/favicon/favicon.ico">
+<meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/tensorly_style.css?v=a02e9698" />
+
+  
+    <script src="../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+ <script src="../../_static/navbar_burger.js"></script>
+ <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"></script>
+ 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  </head>
+<body  class="has-navbar-fixed-top">
+
+  <header>
+    <navbar>
+      <nav class="navbar top-navbar is-fixed-top has-shadow is-flex-wrap-wrap" role="navigation" aria-label="main top navigation">
+        <div class="navbar-brand">
+        
+
+          <a class="navbar-item" href="../../index.html">
+            <img src="../../_static/tensorly-lda.png" height="28">
+          </a>
+          <a class="navbar-item is-hidden-desktop" href="https://github.com/TensorLy/lda" target="_blank">
+              <span class="icon"><i class="fab fa-github"></i></span>
+          </a>
+
+          <a role="button" class="navbar-burger" data-target="top-nav-menu" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+
+        </div>
+        
+        <div class="navbar-menu" id="top-nav-menu">
+        
+
+          <div class="navbar-start">
+            
+              <a class="navbar-item" href="../../install.html">
+              Install
+            </a>
+              <a class="navbar-item" href="../../user_guide/index.html">
+              User Guide
+            </a>
+              <a class="navbar-item" href="../../modules/api.html">
+              API
+            </a>
+          </div>
+        
+          <div class="navbar-end">
+            <div class="navbar-item">
+            
+            <a class="button is-hidden-touch is-dark" href="https://github.com/TensorLy/lda" target="_blank">
+              <span class="icon-text">
+                <span class="icon is-large">
+                  <i class="fab fa-github"></i>
+                </span>
+                <span>Github</span>
+              </span>
+            </a>
+
+            </div> 
+          </div> 
+        </div> 
+
+      </nav>
+      
+    </navbar>
+  </header>
+
+
+  <div id="column-container">
+  <div class="columns is-mobile is-centered">
+	
+  
+
+  <div class="column main-column">
+
+    
+    <div class="main-section">
+
+      
+      
+
+      <div class="container content main-content">
+        
+  <h1>Source code for tlda.tlda_wrapper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">tensorly</span> <span class="k">as</span> <span class="nn">tl</span>
+
+<span class="kn">from</span> <span class="nn">.second_order_cumulant</span> <span class="kn">import</span> <span class="n">SecondOrderCumulant</span>
+<span class="kn">from</span> <span class="nn">.third_order_cumulant</span> <span class="kn">import</span> <span class="n">ThirdOrderCumulant</span>
+
+<div class="viewcode-block" id="TLDA">
+<a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA">[docs]</a>
+<span class="k">class</span> <span class="nc">TLDA</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to learn topic-word distribution from a corpus of documents</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> 
+                <span class="n">pca_batch_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">third_order_cumulant_batch</span><span class="o">=</span><span class="mi">1000</span> <span class="p">,</span> <span class="n">gamma_shape</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> 
+                <span class="n">theta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ortho_loss_criterion</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_topic : int</span>
+<span class="sd">        alpha : int</span>
+<span class="sd">        n_iter_train : int</span>
+<span class="sd">        n_iter_test : int</span>
+<span class="sd">        learning_rate : float</span>
+<span class="sd">        pca_batch_size : int</span>
+<span class="sd">        third_order_cumulant_batch : int</span>
+<span class="sd">        random_seed: optional, default is None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_topic</span>   <span class="o">=</span> <span class="n">n_topic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_0</span>   <span class="o">=</span> <span class="n">alpha_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">=</span> <span class="n">smoothing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span> <span class="o">=</span> <span class="n">third_order_cumulant_batch</span>
+        <span class="k">if</span> <span class="n">n_eigenvec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="n">n_topic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_eigenvec</span> <span class="o">=</span> <span class="n">n_eigenvec</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span>  <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span> <span class="o">=</span> <span class="n">SecondOrderCumulant</span><span class="p">(</span><span class="n">n_eigenvec</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">pca_batch_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span>  <span class="o">=</span> <span class="n">ThirdOrderCumulant</span><span class="p">(</span><span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">third_order_cumulant_batch</span><span class="p">,</span>
+                                               <span class="n">learning_rate</span><span class="p">,</span> <span class="n">gamma_shape</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">ortho_loss_criterion</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">,</span> <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="n">n_eigenvec</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TLDA.fit">
+<a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and </span>
+<span class="sd">        the tensors required to compute its word-topic distribution fit in memory.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: tensor of size (self.n_documents , self.vocab) all documents used to fit the word-topic distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">X_whit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_whit</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">X_whit</span>
+            
+        <span class="k">del</span> <span class="n">X</span></div>
+
+    
+    <span class="k">def</span> <span class="nf">_partial_fit_first_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span><span class="p">)</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">+</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">+=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">X_batch</span>
+
+    <span class="k">def</span> <span class="nf">_partial_fit_second_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">y</span>  <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">y</span> 
+        <span class="k">del</span> <span class="n">X_batch</span>
+    
+    <span class="k">def</span> <span class="nf">_partial_fit_third_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span><span class="p">):</span>
+            <span class="n">y</span>  <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> 
+            <span class="k">del</span> <span class="n">y</span>
+        <span class="k">del</span> <span class="n">X_batch</span>
+
+<div class="viewcode-block" id="TLDA.partial_fit">
+<a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.partial_fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">batch_index</span><span class="p">,</span> <span class="n">save_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the word-topic distribution using a batch of documents. For a given batch, the</span>
+<span class="sd">        first and second order cumulants need to be fit once, but the third order cumulant should</span>
+<span class="sd">        be fit many times.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X_batch : tensor of shape (batch_size, self.vocab)</span>
+<span class="sd">        batch_index : int</span>
+<span class="sd">            index of the current batch.</span>
+<span class="sd">            This is used to know whether to update the first and second moment or just whiten</span>
+<span class="sd">        save_folder : str, default is None</span>
+<span class="sd">            Folder in which to store the whitened batches.</span>
+<span class="sd">            If None, the whitened batches will be recomputed at each iteration</span>
+<span class="sd">            instead of being catched.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;seen_batches&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">batch_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">:</span>
+            <span class="c1"># We&#39;ve seen the batch at least once</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># We already whitened it, just load that</span>
+                <span class="k">if</span> <span class="n">save_folder</span><span class="p">:</span>
+                    <span class="n">save_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span>
+                    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">save_folder</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">save_file</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span><span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">X_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_batch</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only saw it once: that whitened version is not exact, recompute</span>
+                <span class="n">X_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_batch</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">save_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_whitened_batch_</span><span class="si">{</span><span class="n">batch_index</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_file</span>
+                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">save_folder</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">save_file</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_third_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># First time we see the batch: recompute the whitened version next time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_first_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_second_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="TLDA.partial_fit_online">
+<a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.partial_fit_online">[docs]</a>
+    <span class="k">def</span> <span class="nf">partial_fit_online</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the word-topic distribution using a batch of documents in a fully online version. Meant for very large datasets,</span>
+<span class="sd">        since we only do one gradient update for each batch in the third order cumulant calculation.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X_batch : tensor of shape (batch_size, self.vocab)</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_first_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_second_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
+        <span class="n">X_whit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_batch</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">X_batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_third_order</span><span class="p">(</span><span class="n">X_whit</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">X_whit</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_unwhiten_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unwhitens self.third_order.factors_, then uncenters and unnormalizes&quot;&quot;&quot;</span>
+        <span class="n">factors_unwhitened</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">factors_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> 
+
+        <span class="c1"># Un-centers the data</span>
+        <span class="n">factors_unwhitened</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">factors_unwhitened</span> <span class="p">[</span><span class="n">factors_unwhitened</span>  <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1"># remove non-negative probabilities</span>
+
+        <span class="c1"># Save unwhitened factors before postprocessing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_raw_</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">factors_unwhitened</span><span class="p">)</span>
+        
+        <span class="c1"># Smoothing</span>
+        <span class="n">factors_unwhitened</span> <span class="o">*=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span>
+        <span class="n">factors_unwhitened</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">/</span> <span class="n">factors_unwhitened</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Calculate the eigenvalues from the whitened factors</span>
+        <span class="n">eig_vals</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">tl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">factors_</span> <span class="p">])</span>
+        <span class="n">alpha</span>           <span class="o">=</span> <span class="n">eig_vals</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Recover the topic weights </span>
+        <span class="n">alpha_norm</span>      <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="n">alpha</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span>   <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">alpha_norm</span><span class="p">)</span>
+
+        <span class="c1"># Normalize the factors</span>
+        
+        <span class="n">factors_unwhitened</span> <span class="o">/=</span> <span class="n">factors_unwhitened</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">factors_unwhitened</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">unwhitened_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># This doesnt work</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unwhitened learned factors of shape (n_topic, vocabulary_size)</span>
+
+<span class="sd">        On the first call, this will compute and store the unwhitened factors.</span>
+<span class="sd">        Subsequent calls will simply return the stored value. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwhiten_factors</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span>
+
+<div class="viewcode-block" id="TLDA.transform">
+<a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform the document-word matrix of a set of documents into a word-topic distribution and topic-distribution when predict=True.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------  </span>
+<span class="sd">        X : tensor of shape (n_documents , self.vocab) </span>
+<span class="sd">            set of documetns to predict topic distribution</span>
+<span class="sd">        predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span>
+        <span class="k">if</span> <span class="n">predict</span><span class="p">:</span>
+            <span class="n">predicted_topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_raw_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">predicted_topics</span>
+        
+        <span class="k">return</span> <span class="n">predicted_topics</span></div>
+</div>
+
+</pre></div>
+
+      </div>
+
+      
+
+        <footer class="footer">
+    <div class="content has-text-centered">
+        <div class="block">
+          &copy; Copyright 2024, TODO authors.<br/>
+        </div>
+    </div>
+  </footer>
+
+    </div>
+
+  </div>  
+
+	
+
+  </div>  
+  </div> 
+
+  
+  <script>
+    function toggle_sidebar() {
+        var element = document.getElementById("sidebar");
+        var container = document.getElementById("column-container");
+        var localtoccolumn = document.getElementById("localtoc-column");
+        element.classList.toggle("hide-tablet");
+        element.classList.toggle("is-hidden-mobile");
+        container.classList.toggle("sidemenu-hidden");
+        localtoccolumn.classList.toggle("is-one-fifth-widescreen");
+        localtoccolumn.classList.toggle("is-2-desktop");
+        localtoccolumn.classList.toggle("is-3-desktop");
+    }
+  </script> 
+
+
+
+  </body>
+</html>
