@@ -22,6 +22,7 @@ class TLDA():
         learning_rate : float
         pca_batch_size : int
         third_order_cumulant_batch : int
+        random_seed: optional, default is None
         """
         self.n_topic   = n_topic
         self.alpha_0   = alpha_0
