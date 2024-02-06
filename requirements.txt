@@ -5,3 +5,4 @@ pytest-cov
 tensorly
 tensorly-torch
 scikit-learn
+nltk
