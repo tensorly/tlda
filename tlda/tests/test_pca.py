@@ -23,7 +23,7 @@ def test_pca():
     a_cent = a - tlda.mean
 
     # check that WT M2 W = I
-    M2 = (alpha_0 + 1)*tl.mean(tensordot(a_cent, a_cent, modes=0), axis=0)
+    M2 = (alpha_0 + 1)*tl.mean(tensordot(a_cent, a_cent, modes=1), axis=0)
     W = tlda.second_order.projection_weights_ / tl.sqrt(tlda.second_order.whitening_weights_)[None, :]
     res = tl.dot(tl.dot(W.T, M2), W)
     
