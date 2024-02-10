@@ -119,18 +119,18 @@
 
 <span class="k">def</span> <span class="nf">loss_rec</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Inputs:</span>
-<span class="sd">        factor: (n_topics x n_topics): whitened factors from the SGD </span>
+<span class="sd">        factor: (n_topics x n_topics): whitened factors from the SGD</span>
 <span class="sd">        cumulant: Whitened M3 (n_topics x n_topicsx n_topics)</span>
-<span class="sd">        theta:  othogonalization penalty term (scalar)            </span>
-<span class="sd">        output:  </span>
+<span class="sd">        theta:  othogonalization penalty term (scalar)</span>
+<span class="sd">        output:</span>
 <span class="sd">        orthogonality loss:</span>
-<span class="sd">  </span>
-<span class="sd">    &#39;&#39;&#39;</span>   
+
+<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">rec</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">cp_to_tensor</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">factor</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">))</span>
-    <span class="n">ortho_loss</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">theta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">tl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> 
+    <span class="n">ortho_loss</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">theta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">tl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
 
-    <span class="k">return</span> <span class="n">ortho_loss</span> 
+    <span class="k">return</span> <span class="n">ortho_loss</span>
 
 
 <div class="viewcode-block" id="ThirdOrderCumulant">
@@ -139,7 +139,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to compute the third order cumulant</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span>
                  <span class="n">learning_rate</span><span class="p">,</span> <span class="n">gamma_shape</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                  <span class="n">theta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ortho_loss_criterion</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_eigenvec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">learning_rate_criterion</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">):</span> <span class="c1"># we could try to find a more informative name for alpha_0</span>
@@ -148,13 +148,13 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        n_topic : </span>
-<span class="sd">        alpha_0 : </span>
+<span class="sd">        n_topic :</span>
+<span class="sd">        alpha_0 :</span>
 <span class="sd">        n_iter_train : int</span>
 <span class="sd">        n_iter_test : int</span>
 <span class="sd">        batch_size : int</span>
 <span class="sd">        learning_rate : float</span>
-<span class="sd">        cumulant : </span>
+<span class="sd">        cumulant :</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">check_random_state</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
@@ -170,23 +170,23 @@
             <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_topic</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_eigenvec</span> <span class="o">=</span> <span class="n">n_eigenvec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_criterion</span> <span class="o">=</span> <span class="n">learning_rate_criterion</span>
-        
+
         <span class="c1"># initializing the orthogonality loss</span>
         <span class="n">ortho_loss</span> <span class="o">=</span> <span class="n">ortho_loss_criterion</span><span class="o">+</span><span class="mi">1</span>
 
         <span class="c1"># Finding optimal starting values based on orthonormal inits:</span>
         <span class="k">while</span> <span class="n">ortho_loss</span> <span class="o">&gt;=</span> <span class="n">ortho_loss_criterion</span><span class="p">:</span>
             <span class="n">init_values</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_eigenvec</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">)))</span>
-                
+
             <span class="c1"># init_values has shape (n_eigenvec, min(n_topic, n_eigenvec)) = (n_eigenvec, n_topic)</span>
             <span class="n">init_values</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">init_values</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;reduced&#39;</span><span class="p">)</span>
             <span class="n">ortho_loss</span> <span class="o">=</span> <span class="n">loss_rec</span><span class="p">(</span><span class="n">init_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">-=</span> <span class="mf">0.01</span>
-   
+
         <span class="bp">self</span><span class="o">.</span><span class="n">factors_</span> <span class="o">=</span> <span class="n">init_values</span>
-    
-        
+
+
 <div class="viewcode-block" id="ThirdOrderCumulant.partial_fit">
 <a class="viewcode-back" href="../../modules/generated/tlda.ThirdOrderCumulant.html#tlda.ThirdOrderCumulant.partial_fit">[docs]</a>
     <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">learning_rate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -218,10 +218,10 @@
 <span class="sd">        X : ndarray of shape (number_documents, num_topics) equal to the whitened</span>
 <span class="sd">            word counts in each document in the documents used to update the factors</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_criterion</span> 
+        <span class="n">tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_criterion</span>
         <span class="n">i</span>   <span class="o">=</span> <span class="mi">1</span>
         <span class="n">max_diff</span> <span class="o">=</span> <span class="n">tol</span><span class="o">+</span><span class="mi">1</span>
-        
+
         <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">10</span> <span class="ow">or</span> <span class="n">max_diff</span> <span class="o">&gt;=</span> <span class="n">tol</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_iter_train</span><span class="p">:</span>
             <span class="n">prev_fac</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factors_</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
@@ -233,9 +233,10 @@
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">i</span><span class="o">%</span><span class="mi">5</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;&#39;th iteration complete. Maximum change in factors: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">max_diff</span><span class="p">))</span>
-                
+
         <span class="k">del</span> <span class="n">X</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total iterations: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span></div>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total iterations: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span></div>
 
 
 
@@ -260,9 +261,9 @@
         <span class="n">n_topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_topic</span>
         <span class="n">n_docs</span> <span class="o">=</span> <span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">gammad</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_shape</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_shape</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_docs</span><span class="p">,</span><span class="n">n_topics</span><span class="p">))</span> 
+        <span class="n">gammad</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_shape</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_shape</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_docs</span><span class="p">,</span><span class="n">n_topics</span><span class="p">))</span>
         <span class="n">exp_elogthetad</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">dirichlet_expectation</span><span class="p">(</span><span class="n">gammad</span><span class="p">))</span> <span class="c1">#ndocs, n_topic</span>
-        
+
         <span class="n">epsilon</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">gammad</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
         <span class="n">phinorm</span> <span class="o">=</span> <span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">exp_elogthetad</span><span class="p">,</span><span class="n">adjusted_factors</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span> <span class="c1">#ndoc X nwords</span>
         <span class="n">max_gamma_change</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -274,7 +275,7 @@
             <span class="n">x_phi_norm</span>     <span class="o">=</span>  <span class="n">X_test</span> <span class="o">/</span> <span class="n">phinorm</span>
             <span class="n">x_phi_norm_factors</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x_phi_norm</span><span class="p">,</span> <span class="n">adjusted_factors</span><span class="p">)</span>
             <span class="n">gammad</span>         <span class="o">=</span> <span class="p">((</span><span class="n">exp_elogthetad</span> <span class="o">*</span> <span class="p">(</span><span class="n">x_phi_norm_factors</span><span class="p">))</span> <span class="o">+</span> <span class="n">weights</span><span class="p">)</span> <span class="c1"># estimate for the variational mixing param</span>
-            <span class="n">exp_elogthetad</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">dirichlet_expectation</span><span class="p">(</span><span class="n">gammad</span><span class="p">))</span> 
+            <span class="n">exp_elogthetad</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">dirichlet_expectation</span><span class="p">(</span><span class="n">gammad</span><span class="p">))</span>
             <span class="n">phinorm</span>        <span class="o">=</span> <span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">exp_elogthetad</span><span class="p">,</span><span class="n">adjusted_factors</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
 
             <span class="n">mean_gamma_change_pdoc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gammad</span> <span class="o">-</span> <span class="n">lastgamma</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_topics</span>
@@ -282,7 +283,7 @@
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End Document Topic Prediction Iteration &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot; out of &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter_test</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current Maximal Change:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_gamma_change</span><span class="p">))</span>
-            
+
         <span class="k">del</span> <span class="n">X_test</span>
         <span class="k">return</span> <span class="n">gammad</span></div>
 </div>

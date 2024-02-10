@@ -119,8 +119,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to learn topic-word distribution from a corpus of documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> 
-                <span class="n">pca_batch_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">third_order_cumulant_batch</span><span class="o">=</span><span class="mi">1000</span> <span class="p">,</span> <span class="n">gamma_shape</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span>
+                <span class="n">pca_batch_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">third_order_cumulant_batch</span><span class="o">=</span><span class="mi">1000</span> <span class="p">,</span> <span class="n">gamma_shape</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
                 <span class="n">theta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ortho_loss_criterion</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -141,7 +141,7 @@
         <span class="k">if</span> <span class="n">n_eigenvec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="n">n_topic</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_eigenvec</span> <span class="o">=</span> <span class="n">n_eigenvec</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span>  <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topic</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">=</span> <span class="mi">0</span>
@@ -156,7 +156,7 @@
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.fit">[docs]</a>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and </span>
+<span class="sd">        Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and</span>
 <span class="sd">        the tensors required to compute its word-topic distribution fit in memory.</span>
 
 <span class="sd">        Parameters</span>
@@ -167,18 +167,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">X_whit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_whit</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">X_whit</span>
-            
+
         <span class="k">del</span> <span class="n">X</span></div>
 
-    
+
     <span class="k">def</span> <span class="nf">_partial_fit_first_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -192,13 +192,13 @@
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
             <span class="n">y</span>  <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
-            <span class="k">del</span> <span class="n">y</span> 
+            <span class="k">del</span> <span class="n">y</span>
         <span class="k">del</span> <span class="n">X_batch</span>
-    
+
     <span class="k">def</span> <span class="nf">_partial_fit_third_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span><span class="p">):</span>
             <span class="n">y</span>  <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">y</span>
         <span class="k">del</span> <span class="n">X_batch</span>
 
@@ -209,7 +209,7 @@
 <span class="sd">        Update the word-topic distribution using a batch of documents. For a given batch, the</span>
 <span class="sd">        first and second order cumulants need to be fit once, but the third order cumulant should</span>
 <span class="sd">        be fit many times.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        X_batch : tensor of shape (batch_size, self.vocab)</span>
@@ -223,7 +223,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;seen_batches&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        
+
         <span class="k">if</span> <span class="n">batch_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">:</span>
             <span class="c1"># We&#39;ve seen the batch at least once</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -243,7 +243,7 @@
                     <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">save_folder</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">save_file</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">seen_batches</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_third_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -260,11 +260,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the word-topic distribution using a batch of documents in a fully online version. Meant for very large datasets,</span>
 <span class="sd">        since we only do one gradient update for each batch in the third order cumulant calculation.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        X_batch : tensor of shape (batch_size, self.vocab)</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_first_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_partial_fit_second_order</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)</span>
         <span class="n">X_whit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_batch</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
@@ -275,7 +275,7 @@
 
     <span class="k">def</span> <span class="nf">_unwhiten_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unwhitens self.third_order.factors_, then uncenters and unnormalizes&quot;&quot;&quot;</span>
-        <span class="n">factors_unwhitened</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">factors_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> 
+        <span class="n">factors_unwhitened</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">factors_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
         <span class="c1"># Un-centers the data</span>
         <span class="n">factors_unwhitened</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
@@ -283,7 +283,7 @@
 
         <span class="c1"># Save unwhitened factors before postprocessing</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_raw_</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">factors_unwhitened</span><span class="p">)</span>
-        
+
         <span class="c1"># Smoothing</span>
         <span class="n">factors_unwhitened</span> <span class="o">*=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span>
         <span class="n">factors_unwhitened</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">/</span> <span class="n">factors_unwhitened</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -291,12 +291,12 @@
         <span class="c1"># Calculate the eigenvalues from the whitened factors</span>
         <span class="n">eig_vals</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">tl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">factors_</span> <span class="p">])</span>
         <span class="n">alpha</span>           <span class="o">=</span> <span class="n">eig_vals</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
-        <span class="c1"># Recover the topic weights </span>
+        <span class="c1"># Recover the topic weights</span>
         <span class="n">alpha_norm</span>      <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="n">alpha</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span>   <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">alpha_norm</span><span class="p">)</span>
 
         <span class="c1"># Normalize the factors</span>
-        
+
         <span class="n">factors_unwhitened</span> <span class="o">/=</span> <span class="n">factors_unwhitened</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">factors_unwhitened</span>
 
@@ -305,7 +305,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unwhitened learned factors of shape (n_topic, vocabulary_size)</span>
 
 <span class="sd">        On the first call, this will compute and store the unwhitened factors.</span>
-<span class="sd">        Subsequent calls will simply return the stored value. </span>
+<span class="sd">        Subsequent calls will simply return the stored value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwhiten_factors</span><span class="p">()</span>
@@ -313,22 +313,22 @@
 
 <div class="viewcode-block" id="TLDA.transform">
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform the document-word matrix of a set of documents into a word-topic distribution and topic-distribution when predict=True.</span>
 
 <span class="sd">        Parameters</span>
-<span class="sd">        ----------  </span>
-<span class="sd">        X : tensor of shape (n_documents , self.vocab) </span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : tensor of shape (n_documents , self.vocab)</span>
 <span class="sd">            set of documetns to predict topic distribution</span>
-<span class="sd">        predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. </span>
+<span class="sd">        predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">unwhitened_factors_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors</span>
         <span class="k">if</span> <span class="n">predict</span><span class="p">:</span>
             <span class="n">predicted_topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwhitened_factors_raw_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">predicted_topics</span>
-        
+
         <span class="k">return</span> <span class="n">predicted_topics</span></div>
 </div>
 
