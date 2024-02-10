@@ -9,8 +9,8 @@ class TLDA():
     """
     Class to learn topic-word distribution from a corpus of documents
     """
-    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate, 
-                pca_batch_size=10000, third_order_cumulant_batch=1000 , gamma_shape=1.0, smoothing=1e-6, 
+    def __init__(self, n_topic, alpha_0, n_iter_train, n_iter_test, learning_rate,
+                pca_batch_size=10000, third_order_cumulant_batch=1000 , gamma_shape=1.0, smoothing=1e-6,
                 theta=1, ortho_loss_criterion=1000, n_eigenvec = None, random_seed=None):
         """
         Parameters
@@ -31,7 +31,7 @@ class TLDA():
         if n_eigenvec is None:
             n_eigenvec = n_topic
         self.n_eigenvec = n_eigenvec
-        
+
         self.weights_  = tl.ones(self.n_topic)
         self.vocab = 0
         self.n_documents = 0
@@ -44,7 +44,7 @@ class TLDA():
 
     def fit(self, X, order = None):
         """
-        Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and 
+        Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and
         the tensors required to compute its word-topic distribution fit in memory.
 
         Parameters
@@ -55,17 +55,17 @@ class TLDA():
             self.n_documents = X.shape[0]
             self.vocab = X.shape[1]
             self.mean = tl.mean(X, axis=0)
-        
+
         if order is None or order == 2:
             self.second_order.fit(X - self.mean)
-        
+
         if order is None or order == 3:
             X_whit = self.second_order.transform(X - self.mean)
             self.third_order.fit(X_whit,verbose=False)
             del X_whit
-            
+
         del X
-    
+
     def _partial_fit_first_order(self, X_batch):
         if self.mean is None:
             self.vocab = X_batch.shape[1]
@@ -79,13 +79,13 @@ class TLDA():
         for j in range(0, len(X_batch), self.second_order.batch_size):
             y  = X_batch[j:j+self.second_order.batch_size]
             self.second_order.partial_fit(y - self.mean)
-            del y 
+            del y
         del X_batch
-    
+
     def _partial_fit_third_order(self, X_batch):
         for j in range(0, len(X_batch), self.third_order_cumulant_batch):
             y  = X_batch[j:j+self.third_order_cumulant_batch]
-            self.third_order.partial_fit(y) 
+            self.third_order.partial_fit(y)
             del y
         del X_batch
 
@@ -94,7 +94,7 @@ class TLDA():
         Update the word-topic distribution using a batch of documents. For a given batch, the
         first and second order cumulants need to be fit once, but the third order cumulant should
         be fit many times.
-        
+
         Parameters
         ----------
         X_batch : tensor of shape (batch_size, self.vocab)
@@ -108,7 +108,7 @@ class TLDA():
         """
         if not hasattr(self, "seen_batches"):
             self.seen_batches = dict()
-        
+
         if batch_index in self.seen_batches:
             # We've seen the batch at least once
             if self.seen_batches[batch_index] != 0:
@@ -128,7 +128,7 @@ class TLDA():
                     pickle.dump(X_batch, open(Path(save_folder).joinpath(save_file).as_posix(), 'wb'))
                 else:
                     self.seen_batches[batch_index] = 1
-            
+
             self._partial_fit_third_order(X_batch)
 
         else:
@@ -142,11 +142,11 @@ class TLDA():
         """
         Update the word-topic distribution using a batch of documents in a fully online version. Meant for very large datasets,
         since we only do one gradient update for each batch in the third order cumulant calculation.
-        
+
         Parameters
         ----------
         X_batch : tensor of shape (batch_size, self.vocab)
-        """        
+        """
         self._partial_fit_first_order(X_batch)
         self._partial_fit_second_order(X_batch)
         X_whit = self.second_order.transform(X_batch - self.mean)
@@ -156,7 +156,7 @@ class TLDA():
 
     def _unwhiten_factors(self):
         """Unwhitens self.third_order.factors_, then uncenters and unnormalizes"""
-        factors_unwhitened = self.second_order.reverse_transform(self.third_order.factors_.T).T 
+        factors_unwhitened = self.second_order.reverse_transform(self.third_order.factors_.T).T
 
         # Un-centers the data
         factors_unwhitened += tl.reshape(self.mean,(self.vocab,1))
@@ -164,7 +164,7 @@ class TLDA():
 
         # Save unwhitened factors before postprocessing
         self.unwhitened_factors_raw_ = tl.copy(factors_unwhitened)
-        
+
         # Smoothing
         factors_unwhitened *= (1. - self.smoothing)
         factors_unwhitened += (self.smoothing / factors_unwhitened.shape[1])
@@ -172,12 +172,12 @@ class TLDA():
         # Calculate the eigenvalues from the whitened factors
         eig_vals = tl.tensor([tl.norm(k)**3 for k in self.third_order.factors_ ])
         alpha           = eig_vals**(-2)
-        # Recover the topic weights 
+        # Recover the topic weights
         alpha_norm      = (alpha / alpha.sum()) * self.alpha_0
         self.weights_   = tl.tensor(alpha_norm)
 
         # Normalize the factors
-        
+
         factors_unwhitened /= factors_unwhitened.sum(axis=0)
         return factors_unwhitened
 
@@ -186,26 +186,26 @@ class TLDA():
         """Unwhitened learned factors of shape (n_topic, vocabulary_size)
 
         On the first call, this will compute and store the unwhitened factors.
-        Subsequent calls will simply return the stored value. 
+        Subsequent calls will simply return the stored value.
         """
         if self.unwhitened_factors_ is None:
             self.unwhitened_factors_ = self._unwhiten_factors()
         return self.unwhitened_factors_
 
-    def transform(self, X=None, predict=True):
+    def transform(self, X=None, predict=False):
         """
         Transform the document-word matrix of a set of documents into a word-topic distribution and topic-distribution when predict=True.
 
         Parameters
-        ----------  
-        X : tensor of shape (n_documents , self.vocab) 
+        ----------
+        X : tensor of shape (n_documents , self.vocab)
             set of documetns to predict topic distribution
-        predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution. 
+        predict : indicate whether to return topic-document distribution and word-topic distribution or just word-topic distribution.
         """
 
-        self.third_order.unwhitened_factors_ = self.unwhitened_factors_
+        self.third_order.unwhitened_factors_ = self.unwhitened_factors
         if predict:
             predicted_topics = self.third_order.predict(X, self.unwhitened_factors_raw_, self.weights_)
             return predicted_topics
-        
+
         return predicted_topics
