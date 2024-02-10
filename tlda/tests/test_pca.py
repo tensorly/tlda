@@ -8,7 +8,7 @@ def test_pca():
                   [1, 0, 3, 2, 3],
                   [0, 0, 4, 1, 1],
                  [1, 1, 1, 2, 1]])
-    
+
     alpha_0 = 1.5
     k = 2
     batch_size_pca = 4
@@ -23,10 +23,10 @@ def test_pca():
     a_cent = a - tlda.mean
 
     # check that WT M2 W = I
-    M2 = (alpha_0 + 1)*tl.mean(tensordot(a_cent, a_cent, modes=1), axis=0)
+    M2 = (alpha_0 + 1)/a_cent.shape[0]*tl.tensordot(tl.transpose(a_cent), a_cent, axes=1)
     W = tlda.second_order.projection_weights_ / tl.sqrt(tlda.second_order.whitening_weights_)[None, :]
     res = tl.dot(tl.dot(W.T, M2), W)
-    
+
     assert_array_almost_equal(res, true_res)
 
 test_pca()

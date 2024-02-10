@@ -1,5 +1,4 @@
-from ..third_order_cumulant import ThirdOrderCumulant
-from ..second_order_cumulant import SecondOrderCumulant
+from ..tlda_wrapper import TLDA
 import tensorly as tl
 import numpy as np
 import numpy.random
@@ -66,42 +65,40 @@ def correlate(a, v):
     return np.correlate(a, v)
 
 def test_fit():
-    num_tops = 2
-    num_tweets = 2000
+    # set parameters
+    k = 2
+    num_docs = 2000
     density = 15
     vocab   = 100
     n_iter_train     = 2001
     batch_size_pca =  2000
     batch_size_grad  = 10
-    n_iter_test = 10 
-    theta_param =  10
+    n_iter_test = 10
     learning_rate = 0.01
-    smoothing  = 1e-5 #1e-5
-    seed       = 1 
+    seed       = 1
 
-    x, mu, _, alpha_0 = get_mu(num_tops, vocab, num_tweets, density, seed)
+    # get dataset from dirichlet distribution
+    x, mu, _, alpha_0 = get_mu(k, vocab, num_docs, density, seed)
 
-    M1 = tl.mean(x, axis=0)
-    x_cent = tl.tensor(x - M1)
-    pca = SecondOrderCumulant(num_tops, alpha_0, batch_size_pca)
-    pca.fit(x_cent)
-    W = pca.projection_weights_ / tl.sqrt(pca.whitening_weights_)[None, :]
-    x_whit = pca.transform(x_cent)
+    # run TLDA
+    tlda = TLDA(
+        k, alpha_0, n_iter_train, n_iter_test, learning_rate,
+        pca_batch_size=batch_size_pca,
+        third_order_cumulant_batch=batch_size_pca,
+        random_seed=seed
+    )
+    tlda.fit(x)
+    factors_unwhitened = tlda.unwhitened_factors
 
-    '''fit the tensor lda model'''
-    tlda = ThirdOrderCumulant(num_tops, alpha_0, n_iter_train,n_iter_test ,batch_size_grad ,learning_rate,gamma_shape = 1.0, theta=theta_param)
-    tlda.fit(x_whit,W,verbose=True)
-    factors_unwhitened = tlda.postprocess(pca, M1, vocab)
-
-    '''test RMSE'''
+    # test correlation between predicted and ground truth topics
     mu = np.asarray(mu)[:, 0, :]
     permutations = [[0, 1], [1, 0]]
 
     accuracy = []
     for j in range(len(permutations)):
-        for i in range(num_tops):
+        for i in range(k):
             accuracy.append(correlate(factors_unwhitened.T[i,:], mu[permutations[j]][i,:]))
-    
+
     assert(max(sum(accuracy[:2]), sum(accuracy[2:])) >= 1.5)
 
 test_fit()
