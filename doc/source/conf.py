@@ -41,13 +41,13 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.mathjax', #'sphinx.ext.imgmath',
     'numpydoc.numpydoc',
-    # 'sphinx_gallery.gen_gallery',
+    'sphinx_gallery.gen_gallery',
 ]
 
-# sphinx_gallery_conf = {
-#      'examples_dirs': '../../examples',   # path to your example scripts
-#      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-# }
+sphinx_gallery_conf = {
+      'examples_dirs': '../../examples',   # path to your example scripts
+      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+ }
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -58,7 +58,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-# NumPy 
+# NumPy
 numpydoc_class_members_toctree = False
 numpydoc_show_class_members = True
 numpydoc_show_inherited_class_members = False
@@ -96,7 +96,7 @@ html_theme_options = {
     'nav_links' : [('Install', 'install'),
                    ('User Guide', 'user_guide/index'),
                    ('API', 'modules/api'),
-                #    ('Examples', 'auto_examples/index')
+                   ('Examples', 'auto_examples/index')
                   ],
     # 'external_nav_links' : [('TensorLy', 'http://tensorly.org/dev')]
 }
@@ -108,4 +108,3 @@ html_static_path = ['_static']
 
 # Remove the permalinks ("¶" symbols)
 html_permalinks_icon = ""
-

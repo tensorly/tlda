@@ -1,3 +1,10 @@
+"""
+Fitting TLDA on UCI-Newsgroups
+==============================
+
+In this example, we show how to run TLDA on a subset of the UCI 20 Newsgroups dataset.
+"""
+
 import numpy as np
 import nltk
 nltk.download('stopwords')
@@ -6,7 +13,8 @@ stop_words = list(stopwords.words('english'))
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.datasets import fetch_20newsgroups
-from examples.demo_util import generate_top_words
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 # Import TensorLy
 import tensorly as tl
@@ -48,8 +56,29 @@ tlda.fit(vectors)
 
 print("Creating image to display fitted topics")
 # Generate a wordcloud from the topics
-generate_top_words(
-    tlda.unwhitened_factors.T,
-    vocab,
-    np.argsort(tlda.weights_),
-    k, 25)
+
+topic_order = np.argsort(tlda.weights_)
+
+cloud = WordCloud(stopwords=stop_words,
+              background_color='white',
+              width=1000*k,
+              height=1000,
+              max_words=25,
+              colormap='tab10')
+
+fig, axes = plt.subplots(1, 2, figsize=(7, 7),
+                         sharey=True)
+
+for i, ax in enumerate(axes.flatten()):
+    fig.add_subplot(ax)
+    if i < k:
+        cloud.generate_from_frequencies(dict(zip(vocab, tlda.unwhitened_factors.T[topic_order[i], :])))
+        plt.gca().imshow(cloud)
+        plt.gca().set_title('Topic ' + str(topic_order[i]), fontdict=dict(size=16))
+    plt.gca().axis('off')
+
+plt.subplots_adjust(wspace=0, hspace=0)
+plt.axis('off')
+plt.margins(x=0, y=0)
+plt.tight_layout()
+plt.show()
