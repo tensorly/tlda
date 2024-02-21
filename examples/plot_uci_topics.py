@@ -36,7 +36,7 @@ texts = newsgroups_test.data
 # Generate count vectors from documents.
 vectorizer = CountVectorizer(min_df = 0.05,
                              max_df = 0.2,
-                             ngram_range = [1, 2],
+                             ngram_range = (1, 2),
                              stop_words = stop_words)
 vectors = vectorizer.fit_transform(texts).toarray()
 vocab = vectorizer.get_feature_names()
