@@ -39,7 +39,7 @@ vectorizer = CountVectorizer(min_df = 0.05,
                              ngram_range = (1, 2),
                              stop_words = stop_words)
 vectors = vectorizer.fit_transform(texts).toarray()
-vocab = vectorizer.get_feature_names()
+vocab = vectorizer.get_feature_names_out()
 
 print("Running tensor LDA")
 # Initialize Tensor LDA
