@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tensor LDA &#8212; tlda 0.1.0 documentation</title> 
+    <title>Computation times &#8212; tlda 0.1.0 documentation</title> 
 <link rel="stylesheet" href="../_static/tensorly_style.css">
 <link rel="apple-touch-icon" sizes="180x180" href="../_static/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../_static/favicon/favicon-32x32.png">
@@ -31,8 +31,6 @@
  
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="API reference" href="../modules/api.html" />
-    <link rel="prev" title="User guide" href="index.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
   </head>
@@ -67,13 +65,13 @@
               <a class="navbar-item" href="../install.html">
               Install
             </a>
-              <a class="navbar-item" href="index.html">
+              <a class="navbar-item" href="../user_guide/index.html">
               User Guide
             </a>
               <a class="navbar-item" href="../modules/api.html">
               API
             </a>
-              <a class="navbar-item" href="../auto_examples/index.html">
+              <a class="navbar-item" href="index.html">
               Examples
             </a>
           </div>
@@ -124,12 +122,9 @@
 </div>
       
       <div class="sidebar-menu-toc">
-      <ul class="current">
+      <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installing TLDA</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guide</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Tensor LDA</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/api.html">API reference</a></li>
 </ul>
  
@@ -155,8 +150,36 @@
 
       <div class="container content main-content">
         
-  <section id="tensor-lda">
-<h1>Tensor LDA<a class="headerlink" href="#tensor-lda" title="Link to this heading"></a></h1>
+  <section id="computation-times">
+<span id="sphx-glr-auto-examples-sg-execution-times"></span><h1>Computation times<a class="headerlink" href="#computation-times" title="Link to this heading"></a></h1>
+<p><strong>00:12.976</strong> total execution time for 1 file <strong>from auto_examples</strong>:</p>
+<div class="docutils container">
+<style scoped>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+</style>
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" class="init">
+$(document).ready( function () {
+    $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+} );
+</script><table class="table table-striped sg-datatable docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Example</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Mem (MB)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_uci_topics.html#sphx-glr-auto-examples-plot-uci-topics-py"><span class="std std-ref">Fitting TLDA on UCI-Newsgroups</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_uci_topics.py</span></code>)</p></td>
+<td><p>00:12.976</p></td>
+<td><p>0.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 
 
@@ -165,20 +188,6 @@
       
         <nav class="pagination" role="navigation" aria-label="pagination">
     
-    <a class="button pagination-previous" href="index.html" title="previous page" accesskey="p">
-        <span class="icon">
-            <i class="fa fa-arrow-circle-left"></i>
-        </span>
-        <span>User guide</span>
-    </a>
-    
-    
-    <a class="button pagination-next" href="../modules/api.html" title="next page" accesskey="n">
-        <span>API reference </span>
-        <span class="icon">
-            <i class="fa fa-arrow-circle-right"></i>
-        </span>
-    </a>
     
 </nav>
 
