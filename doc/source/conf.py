@@ -20,8 +20,8 @@
 project = 'tlda'
 from datetime import datetime
 year = datetime.now().year
-copyright = f'{year}, TODO authors'
-author = 'TODO authors'
+copyright = f'{year}, Sara Kangaslahti, Daniel Ebanks, Jean Kossaifi, R. Michael Alvarez and Anima Anandkumar'
+author = 'Sara Kangaslahti, Daniel Ebanks, Jean Kossaifi, R. Michael Alvarez and Anima Anandkumar'
 
 # The full version, including alpha/beta/rc tags
 import tlda
