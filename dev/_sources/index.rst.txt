@@ -62,3 +62,4 @@ and recover the topics.
    install
    user_guide/index
    modules/api
+   auto_examples/index
