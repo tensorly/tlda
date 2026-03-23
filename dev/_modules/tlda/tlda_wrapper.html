@@ -14,16 +14,16 @@
 <link rel="shortcut icon" href="../../_static/favicon/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/tensorly_style.css?v=a02e9698" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
   
     <script src="../../_static/documentation_options.js?v=01f34227"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
  <script src="../../_static/navbar_burger.js"></script>
  <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"></script>
@@ -113,20 +113,20 @@
       <div class="container content main-content">
         
   <h1>Source code for tlda.tlda_wrapper</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">tensorly</span> <span class="k">as</span> <span class="nn">tl</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorly</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
 
-<span class="kn">from</span> <span class="nn">.second_order_cumulant</span> <span class="kn">import</span> <span class="n">SecondOrderCumulant</span>
-<span class="kn">from</span> <span class="nn">.third_order_cumulant</span> <span class="kn">import</span> <span class="n">ThirdOrderCumulant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.second_order_cumulant</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecondOrderCumulant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.third_order_cumulant</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThirdOrderCumulant</span>
 
 <div class="viewcode-block" id="TLDA">
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA">[docs]</a>
-<span class="k">class</span> <span class="nc">TLDA</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TLDA</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to learn topic-word distribution from a corpus of documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_topic</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">n_iter_train</span><span class="p">,</span> <span class="n">n_iter_test</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span>
                 <span class="n">pca_batch_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">third_order_cumulant_batch</span><span class="o">=</span><span class="mi">1000</span> <span class="p">,</span> <span class="n">gamma_shape</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
                 <span class="n">theta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ortho_loss_criterion</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_eigenvec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -161,7 +161,7 @@
 
 <div class="viewcode-block" id="TLDA.fit">
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the word-topic distribution for the entire dataset at once. Assumes that the whole dataset and</span>
 <span class="sd">        the tensors required to compute its word-topic distribution fit in memory.</span>
@@ -186,7 +186,7 @@
         <span class="k">del</span> <span class="n">X</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_partial_fit_first_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_partial_fit_first_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -195,14 +195,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_documents</span> <span class="o">+=</span> <span class="n">X_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">del</span> <span class="n">X_batch</span>
 
-    <span class="k">def</span> <span class="nf">_partial_fit_second_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_partial_fit_second_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
             <span class="n">y</span>  <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">y</span>
         <span class="k">del</span> <span class="n">X_batch</span>
 
-    <span class="k">def</span> <span class="nf">_partial_fit_third_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_partial_fit_third_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_batch</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span><span class="p">):</span>
             <span class="n">y</span>  <span class="o">=</span> <span class="n">X_batch</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order_cumulant_batch</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -211,7 +211,7 @@
 
 <div class="viewcode-block" id="TLDA.partial_fit">
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.partial_fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">batch_index</span><span class="p">,</span> <span class="n">save_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">batch_index</span><span class="p">,</span> <span class="n">save_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the word-topic distribution using a batch of documents. For a given batch, the</span>
 <span class="sd">        first and second order cumulants need to be fit once, but the third order cumulant should</span>
@@ -263,7 +263,7 @@
 
 <div class="viewcode-block" id="TLDA.partial_fit_online">
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.partial_fit_online">[docs]</a>
-    <span class="k">def</span> <span class="nf">partial_fit_online</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">partial_fit_online</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the word-topic distribution using a batch of documents in a fully online version. Meant for very large datasets,</span>
 <span class="sd">        since we only do one gradient update for each batch in the third order cumulant calculation.</span>
@@ -280,7 +280,7 @@
         <span class="k">del</span> <span class="n">X_whit</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_unwhiten_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unwhiten_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unwhitens self.third_order.factors_, then uncenters and unnormalizes&quot;&quot;&quot;</span>
         <span class="n">factors_unwhitened</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">second_order</span><span class="o">.</span><span class="n">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">third_order</span><span class="o">.</span><span class="n">factors_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
@@ -308,7 +308,7 @@
         <span class="k">return</span> <span class="n">factors_unwhitened</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">unwhitened_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># This doesnt work</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unwhitened_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># This doesnt work</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unwhitened learned factors of shape (n_topic, vocabulary_size)</span>
 
 <span class="sd">        On the first call, this will compute and store the unwhitened factors.</span>
@@ -320,7 +320,7 @@
 
 <div class="viewcode-block" id="TLDA.transform">
 <a class="viewcode-back" href="../../modules/generated/tlda.TLDA.html#tlda.TLDA.transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform the document-word matrix of a set of documents into a word-topic distribution and topic-distribution when predict=True.</span>
 
@@ -348,7 +348,7 @@
         <footer class="footer">
     <div class="content has-text-centered">
         <div class="block">
-          &copy; Copyright 2024, Sara Kangaslahti, Daniel Ebanks, Jean Kossaifi, R. Michael Alvarez and Anima Anandkumar.<br/>
+          &copy; Copyright 2026, Sara Kangaslahti, Daniel Ebanks, Jean Kossaifi, R. Michael Alvarez and Anima Anandkumar.<br/>
         </div>
     </div>
   </footer>

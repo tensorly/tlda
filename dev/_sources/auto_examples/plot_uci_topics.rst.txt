@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_uci_topics.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -134,7 +134,7 @@ In this example, we show how to run TLDA on a subset of the UCI 20 Newsgroups da
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.859 seconds)
+   **Total running time of the script:** (0 minutes 13.400 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_uci_topics.py:
@@ -150,6 +150,10 @@ In this example, we show how to run TLDA on a subset of the UCI 20 Newsgroups da
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_uci_topics.py <plot_uci_topics.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_uci_topics.zip <plot_uci_topics.zip>`
 
 
 .. only:: html

@@ -14,16 +14,16 @@
 <link rel="shortcut icon" href="../../_static/favicon/favicon.ico">
 <meta name="theme-color" content="#ffffff">
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/tensorly_style.css?v=a02e9698" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
   
     <script src="../../_static/documentation_options.js?v=01f34227"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
  <script src="../../_static/navbar_burger.js"></script>
  <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"></script>
@@ -113,22 +113,22 @@
       <div class="container content main-content">
         
   <h1>Source code for tlda.second_order_cumulant</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">tensorly</span> <span class="k">as</span> <span class="nn">tl</span>
-<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">IncrementalPCA</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tensorly</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">IncrementalPCA</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">cuml</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">cuml</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
 <div class="viewcode-block" id="SecondOrderCumulant">
 <a class="viewcode-back" href="../../modules/generated/tlda.SecondOrderCumulant.html#tlda.SecondOrderCumulant">[docs]</a>
-<span class="k">class</span> <span class="nc">SecondOrderCumulant</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SecondOrderCumulant</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to compute the third order cumulant</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_eigenvec</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span> <span class="c1"># n_eigenvec here corresponds to n_topic in the LDA</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_eigenvec</span><span class="p">,</span> <span class="n">alpha_0</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span> <span class="c1"># n_eigenvec here corresponds to n_topic in the LDA</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the second order cumulant from centered batches of data, returns the whitened tensor</span>
 
@@ -150,7 +150,7 @@
     
 <div class="viewcode-block" id="SecondOrderCumulant.fit">
 <a class="viewcode-back" href="../../modules/generated/tlda.SecondOrderCumulant.html#tlda.SecondOrderCumulant.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Method to fit the entire data to get the projection weights (singular vectors) and</span>
 <span class="sd">        whitening weights (scaled explained variance) of a centered input dataset X.</span>
@@ -170,7 +170,7 @@
 
 <div class="viewcode-block" id="SecondOrderCumulant.partial_fit">
 <a class="viewcode-back" href="../../modules/generated/tlda.SecondOrderCumulant.html#tlda.SecondOrderCumulant.partial_fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Fit a batch of data and update the projection weights (singular vectors) and</span>
 <span class="sd">        whitening weights (scaled explained variance) accordingly using a centered</span>
 <span class="sd">        batch of the input dataset X.</span>
@@ -190,7 +190,7 @@
 
 <div class="viewcode-block" id="SecondOrderCumulant.transform">
 <a class="viewcode-back" href="../../modules/generated/tlda.SecondOrderCumulant.html#tlda.SecondOrderCumulant.transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Whiten some centered tensor X using the fitted PCA model.</span>
 
 <span class="sd">        Parameters</span>
@@ -210,7 +210,7 @@
 
 <div class="viewcode-block" id="SecondOrderCumulant.reverse_transform">
 <a class="viewcode-back" href="../../modules/generated/tlda.SecondOrderCumulant.html#tlda.SecondOrderCumulant.reverse_transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Unwhiten some whitened tensor X using the fitted PCA model.</span>
 
 <span class="sd">        Parameters</span>
@@ -237,7 +237,7 @@
         <footer class="footer">
     <div class="content has-text-centered">
         <div class="block">
-          &copy; Copyright 2024, Sara Kangaslahti, Daniel Ebanks, Jean Kossaifi, R. Michael Alvarez and Anima Anandkumar.<br/>
+          &copy; Copyright 2026, Sara Kangaslahti, Daniel Ebanks, Jean Kossaifi, R. Michael Alvarez and Anima Anandkumar.<br/>
         </div>
     </div>
   </footer>
